@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { usePublishedProducts, useCategories } from '@/hooks/useProducts';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Search, ShoppingBag, Star } from 'lucide-react';
+import logo from '@/assets/logo.png';
+import bannerDesktop from '@/assets/banner-desktop.png';
+import bannerMobileHombre from '@/assets/banner-mobile-hombre.png';
+import bannerMobileMujer from '@/assets/banner-mobile-mujer.png';
 
 export default function Index() {
   const [search, setSearch] = useState('');
@@ -27,8 +31,8 @@ export default function Index() {
       {/* Header */}
       <header className="sticky top-0 z-30 border-b bg-card/80 backdrop-blur-sm">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
-          <Link to="/" className="text-xl font-bold tracking-tight" style={{ fontFamily: 'Space Grotesk' }}>
-            Revolución Fit
+          <Link to="/" className="flex items-center">
+            <img src={logo} alt="Revolución Fit" className="h-10" />
           </Link>
           <nav className="flex items-center gap-4">
             <Link to="/admin" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
@@ -38,15 +42,29 @@ export default function Index() {
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-primary py-16 text-primary-foreground sm:py-24">
-        <div className="mx-auto max-w-7xl px-4 text-center">
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl" style={{ lineHeight: '1.1' }}>
-            Tu mejor versión empieza aquí
-          </h1>
-          <p className="mx-auto mt-4 max-w-xl text-lg text-primary-foreground/80" style={{ textWrap: 'balance' }}>
-            Equipamiento deportivo diseñado para quienes entrenan con propósito.
-          </p>
+      {/* Hero — desktop banner + mobile banners */}
+      <section className="relative overflow-hidden">
+        {/* Desktop */}
+        <div className="hidden md:block">
+          <img
+            src={bannerDesktop}
+            alt="Revolución Fit — Tu mejor versión empieza aquí"
+            className="w-full object-cover"
+            style={{ maxHeight: '520px' }}
+          />
+        </div>
+        {/* Mobile — two banners side by side as a swipeable feel */}
+        <div className="md:hidden grid grid-cols-2">
+          <img
+            src={bannerMobileHombre}
+            alt="Revolución Fit Hombre"
+            className="w-full object-cover aspect-[3/4]"
+          />
+          <img
+            src={bannerMobileMujer}
+            alt="Revolución Fit Mujer"
+            className="w-full object-cover aspect-[3/4]"
+          />
         </div>
       </section>
 
@@ -152,8 +170,8 @@ export default function Index() {
                       </Badge>
                     )}
                     {product.stock === 0 && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-                        <span className="rounded-md bg-white px-3 py-1 text-sm font-semibold text-foreground">
+                      <div className="absolute inset-0 flex items-center justify-center bg-foreground/40">
+                        <span className="rounded-md bg-card px-3 py-1 text-sm font-semibold text-foreground">
                           Agotado
                         </span>
                       </div>
@@ -194,8 +212,11 @@ export default function Index() {
 
       {/* Footer */}
       <footer className="border-t bg-card py-8">
-        <div className="mx-auto max-w-7xl px-4 text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} Revolución Fit. Todos los derechos reservados.
+        <div className="mx-auto max-w-7xl px-4 text-center">
+          <img src={logo} alt="Revolución Fit" className="mx-auto h-8 mb-3" />
+          <p className="text-sm text-muted-foreground">
+            © {new Date().getFullYear()} Revolución Fit. Todos los derechos reservados.
+          </p>
         </div>
       </footer>
     </div>
