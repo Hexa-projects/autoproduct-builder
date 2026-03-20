@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import {
   ArrowLeft, Truck, ShieldCheck, RotateCcw, Package, ShoppingBag
 } from 'lucide-react';
+import logo from '@/assets/logo.png';
 
 function appendUTM(url: string) {
   try {
@@ -119,8 +120,8 @@ export default function ProductPage() {
       {/* Header */}
       <header className="sticky top-0 z-30 border-b bg-card/80 backdrop-blur-sm">
         <div className="mx-auto flex h-16 max-w-7xl items-center px-4">
-          <Link to="/" className="text-xl font-bold tracking-tight" style={{ fontFamily: 'Space Grotesk' }}>
-            Revolución Fit
+          <Link to="/" className="flex items-center">
+            <img src={logo} alt="Revolución Fit" className="h-10" />
           </Link>
         </div>
       </header>
