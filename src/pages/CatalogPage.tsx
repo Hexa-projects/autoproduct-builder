@@ -13,11 +13,19 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/s
 import { Search, SlidersHorizontal, ShoppingBag, X } from 'lucide-react';
 import type { ShopifyProduct } from '@/lib/shopify';
 
-type SortOption = 'relevance' | 'price-asc' | 'price-desc' | 'newest';
+type SortOption = 'relevance' | 'best-sellers' | 'price-asc' | 'price-desc' | 'newest';
 
 function sortProducts(products: ShopifyProduct[], sort: SortOption): ShopifyProduct[] {
   const sorted = [...products];
   switch (sort) {
+    case 'best-sellers':
+      // Products with tags 'bestseller' or 'top' first, then by availability
+      return sorted.sort((a, b) => {
+        const aTop = a.node.tags?.some(t => ['bestseller', 'top', 'popular'].includes(t.toLowerCase())) ? 1 : 0;
+        const bTop = b.node.tags?.some(t => ['bestseller', 'top', 'popular'].includes(t.toLowerCase())) ? 1 : 0;
+        if (bTop !== aTop) return bTop - aTop;
+        return (b.node.availableForSale ? 1 : 0) - (a.node.availableForSale ? 1 : 0);
+      });
     case 'price-asc':
       return sorted.sort(
         (a, b) =>
@@ -187,6 +195,7 @@ export default function CatalogPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="relevance">Relevancia</SelectItem>
+                  <SelectItem value="best-sellers">Más vendidos</SelectItem>
                   <SelectItem value="price-asc">Precio: menor</SelectItem>
                   <SelectItem value="price-desc">Precio: mayor</SelectItem>
                   <SelectItem value="newest">Novedades</SelectItem>
