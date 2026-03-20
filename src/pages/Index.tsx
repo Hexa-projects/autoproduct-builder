@@ -1,30 +1,43 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { usePublishedProducts, useCategories } from '@/hooks/useProducts';
+import { useShopifyProducts, useShopifyCollections } from '@/hooks/useShopify';
+import { useCartStore } from '@/stores/cartStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { Search, ShoppingBag, Star } from 'lucide-react';
+import { CartDrawer } from '@/components/CartDrawer';
+import { Search, ShoppingBag, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import logo from '@/assets/logo.png';
 import bannerDesktop from '@/assets/banner-desktop.png';
 import bannerMobileHombre from '@/assets/banner-mobile-hombre.png';
 import bannerMobileMujer from '@/assets/banner-mobile-mujer.png';
+import type { ShopifyProduct } from '@/lib/shopify';
 
 export default function Index() {
   const [search, setSearch] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
-  const [sort, setSort] = useState<'newest' | 'price_asc' | 'price_desc'>('newest');
-  const [featuredOnly, setFeaturedOnly] = useState(false);
+  const { data: products, isLoading } = useShopifyProducts(search || undefined);
+  const { data: collections } = useShopifyCollections();
+  const addItem = useCartStore(s => s.addItem);
+  const isCartLoading = useCartStore(s => s.isLoading);
 
-  const { data: products, isLoading } = usePublishedProducts({
-    search: search || undefined,
-    category: categoryFilter !== 'all' ? categoryFilter : undefined,
-    featured: featuredOnly || undefined,
-    sort,
-  });
-  const { data: categories } = useCategories();
+  const handleAddToCart = async (product: ShopifyProduct, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const variant = product.node.variants.edges[0]?.node;
+    if (!variant || !variant.availableForSale) return;
+    await addItem({
+      product,
+      variantId: variant.id,
+      variantTitle: variant.title,
+      price: variant.price,
+      quantity: 1,
+      selectedOptions: variant.selectedOptions || [],
+    });
+    toast.success('Añadido al carrito', { description: product.node.title });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -34,44 +47,43 @@ export default function Index() {
           <Link to="/" className="flex items-center">
             <img src={logo} alt="Revolución Fit" className="h-10" />
           </Link>
-          <nav className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            {collections && collections.length > 0 && (
+              <nav className="hidden md:flex items-center gap-4">
+                {collections.map((c) => (
+                  <Link
+                    key={c.node.id}
+                    to={`/?collection=${c.node.handle}`}
+                    className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {c.node.title}
+                  </Link>
+                ))}
+              </nav>
+            )}
             <Link to="/admin" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Admin
             </Link>
-          </nav>
+            <CartDrawer />
+          </div>
         </div>
       </header>
 
-      {/* Hero — desktop banner + mobile banners */}
+      {/* Hero */}
       <section className="relative overflow-hidden">
-        {/* Desktop */}
         <div className="hidden md:block">
-          <img
-            src={bannerDesktop}
-            alt="Revolución Fit — Tu mejor versión empieza aquí"
-            className="w-full object-cover"
-            style={{ maxHeight: '520px' }}
-          />
+          <img src={bannerDesktop} alt="Revolución Fit" className="w-full object-cover" style={{ maxHeight: '520px' }} />
         </div>
-        {/* Mobile — two banners side by side as a swipeable feel */}
         <div className="md:hidden grid grid-cols-2">
-          <img
-            src={bannerMobileHombre}
-            alt="Revolución Fit Hombre"
-            className="w-full object-cover aspect-[3/4]"
-          />
-          <img
-            src={bannerMobileMujer}
-            alt="Revolución Fit Mujer"
-            className="w-full object-cover aspect-[3/4]"
-          />
+          <img src={bannerMobileHombre} alt="Revolución Fit Hombre" className="w-full object-cover aspect-[3/4]" />
+          <img src={bannerMobileMujer} alt="Revolución Fit Mujer" className="w-full object-cover aspect-[3/4]" />
         </div>
       </section>
 
-      {/* Filters */}
+      {/* Search */}
       <section className="border-b bg-card">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-4">
-          <div className="relative flex-1 min-w-[200px] max-w-sm">
+        <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-4">
+          <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Buscar productos..."
@@ -80,39 +92,6 @@ export default function Index() {
               className="pl-9"
             />
           </div>
-
-          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Categoría" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todas las categorías</SelectItem>
-              {categories?.map((c) => (
-                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select value={sort} onValueChange={(v) => setSort(v as any)}>
-            <SelectTrigger className="w-[160px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="newest">Más recientes</SelectItem>
-              <SelectItem value="price_asc">Precio: menor</SelectItem>
-              <SelectItem value="price_desc">Precio: mayor</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Button
-            variant={featuredOnly ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setFeaturedOnly(!featuredOnly)}
-            className="gap-1.5"
-          >
-            <Star className="h-3.5 w-3.5" />
-            Destacados
-          </Button>
         </div>
       </section>
 
@@ -128,34 +107,35 @@ export default function Index() {
               </div>
             ))}
           </div>
-        ) : products?.length === 0 ? (
+        ) : !products || products.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <ShoppingBag className="h-12 w-12 text-muted-foreground/40" />
             <h2 className="mt-4 text-lg font-semibold">No hay productos</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              {search ? 'Intenta con otra búsqueda.' : 'Los productos aparecerán aquí cuando se publiquen.'}
+              {search ? 'Intenta con otra búsqueda.' : 'Los productos aparecerán aquí cuando se añadan a la tienda Shopify.'}
             </p>
           </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {products?.map((product) => {
-              const price = product.promotional_price ?? product.original_price;
-              const hasDiscount = product.promotional_price && product.original_price && product.promotional_price < product.original_price;
-              const discount = hasDiscount
-                ? Math.round((1 - Number(product.promotional_price) / Number(product.original_price)) * 100)
-                : 0;
+            {products.map((product) => {
+              const p = product.node;
+              const price = parseFloat(p.priceRange.minVariantPrice.amount);
+              const compareAt = parseFloat(p.compareAtPriceRange.minVariantPrice.amount);
+              const hasDiscount = compareAt > price;
+              const discount = hasDiscount ? Math.round((1 - price / compareAt) * 100) : 0;
+              const mainImage = p.images.edges[0]?.node;
 
               return (
                 <Link
-                  key={product.id}
-                  to={`/products/${product.slug}`}
+                  key={p.id}
+                  to={`/products/${p.handle}`}
                   className="group relative overflow-hidden rounded-xl border bg-card shadow-sm transition-shadow hover:shadow-md active:scale-[0.98]"
                 >
                   <div className="relative aspect-square overflow-hidden bg-muted">
-                    {product.main_image ? (
+                    {mainImage ? (
                       <img
-                        src={product.main_image}
-                        alt={product.name}
+                        src={mainImage.url}
+                        alt={mainImage.altText || p.title}
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                         loading="lazy"
                       />
@@ -169,7 +149,7 @@ export default function Index() {
                         -{discount}%
                       </Badge>
                     )}
-                    {product.stock === 0 && (
+                    {!p.availableForSale && (
                       <div className="absolute inset-0 flex items-center justify-center bg-foreground/40">
                         <span className="rounded-md bg-card px-3 py-1 text-sm font-semibold text-foreground">
                           Agotado
@@ -179,28 +159,27 @@ export default function Index() {
                   </div>
 
                   <div className="p-4">
-                    {product.category && (
-                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                        {product.category.name}
-                      </p>
-                    )}
-                    <h3 className="mt-1 font-semibold leading-snug text-foreground line-clamp-2">
-                      {product.name}
+                    <h3 className="font-semibold leading-snug text-foreground line-clamp-2">
+                      {p.title}
                     </h3>
                     <div className="mt-2 flex items-baseline gap-2">
-                      {price && (
-                        <span className="text-lg font-bold tabular-nums">
-                          €{Number(price).toFixed(2)}
-                        </span>
-                      )}
+                      <span className="text-lg font-bold tabular-nums">
+                        €{price.toFixed(2)}
+                      </span>
                       {hasDiscount && (
                         <span className="text-sm text-muted-foreground line-through tabular-nums">
-                          €{Number(product.original_price).toFixed(2)}
+                          €{compareAt.toFixed(2)}
                         </span>
                       )}
                     </div>
-                    <Button size="sm" className="mt-3 w-full gap-2" variant="default">
-                      Ver producto
+                    <Button
+                      size="sm"
+                      className="mt-3 w-full gap-2"
+                      variant="default"
+                      disabled={!p.availableForSale || isCartLoading}
+                      onClick={(e) => handleAddToCart(product, e)}
+                    >
+                      {isCartLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : p.availableForSale ? 'Añadir al carrito' : 'Agotado'}
                     </Button>
                   </div>
                 </Link>
