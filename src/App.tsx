@@ -6,6 +6,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useCartSync } from "@/hooks/useCartSync";
 import Index from "./pages/Index";
 import ProductPage from "./pages/ProductPage";
+import CatalogPage from "./pages/CatalogPage";
+import ContactPage from "./pages/ContactPage";
 import NotFound from "./pages/NotFound";
 import AdminLayout from "./components/admin/AdminLayout";
 import LoginPage from "./pages/admin/LoginPage";
@@ -24,6 +26,9 @@ function AppContent() {
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/products/:slug" element={<ProductPage />} />
+        <Route path="/colecciones" element={<CatalogPage />} />
+        <Route path="/colecciones/:handle" element={<CatalogPage />} />
+        <Route path="/contacto" element={<ContactPage />} />
         <Route path="/admin/login" element={<LoginPage />} />
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<DashboardPage />} />
