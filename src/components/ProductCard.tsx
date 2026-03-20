@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ShoppingBag, Loader2, ShoppingCart } from 'lucide-react';
 import { useCartStore } from '@/stores/cartStore';
 import { toast } from 'sonner';
+import { trackAddToCart } from '@/lib/tracking';
 import type { ShopifyProduct } from '@/lib/shopify';
 
 interface ProductCardProps {
@@ -42,6 +43,13 @@ export function ProductCard({ product, isBestSeller }: ProductCardProps) {
       price: variant.price,
       quantity: 1,
       selectedOptions: variant.selectedOptions || [],
+    });
+    trackAddToCart({
+      id: variant.id,
+      title: p.title,
+      price: parseFloat(variant.price.amount),
+      currency: variant.price.currencyCode,
+      quantity: 1,
     });
     toast.success('Añadido al carrito', { description: p.title });
   };
