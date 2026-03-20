@@ -1,5 +1,8 @@
 import { Link } from 'react-router-dom';
 import logo from '@/assets/logo.png';
+import visaIcon from '@/assets/visa.svg';
+import mastercardIcon from '@/assets/mastercard.svg';
+import googlePayIcon from '@/assets/google-pay.svg';
 
 const footerLinks = {
   Tienda: [
@@ -19,6 +22,12 @@ const footerLinks = {
   ],
 };
 
+const paymentMethods = [
+  { src: visaIcon, alt: 'Visa' },
+  { src: mastercardIcon, alt: 'Mastercard' },
+  { src: googlePayIcon, alt: 'Google Pay' },
+];
+
 export function Footer() {
   return (
     <footer className="border-t bg-card">
@@ -31,9 +40,9 @@ export function Footer() {
               Equipamiento fitness de calidad para mejorar tu rendimiento y comodidad en cada entrenamiento.
             </p>
             <div className="mt-4 flex items-center gap-3">
-              <span className="rounded border px-2 py-1 text-[10px] font-semibold text-muted-foreground">VISA</span>
-              <span className="rounded border px-2 py-1 text-[10px] font-semibold text-muted-foreground">MC</span>
-              <span className="rounded border px-2 py-1 text-[10px] font-semibold text-muted-foreground">PAYPAL</span>
+              {paymentMethods.map((pm) => (
+                <img key={pm.alt} src={pm.src} alt={pm.alt} className="h-7 w-auto" />
+              ))}
             </div>
           </div>
 
