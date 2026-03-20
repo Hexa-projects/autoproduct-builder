@@ -1,35 +1,22 @@
 import { RotateCcw, CreditCard, MapPin, Truck } from 'lucide-react';
 
 const items = [
-  { icon: RotateCcw, text: 'Devolución gratuita en 30 días' },
-  { icon: CreditCard, text: 'Pago a plazos disponible' },
-  { icon: MapPin, text: 'Envío a toda España e Islas' },
-  { icon: Truck, text: 'Entrega en 2–5 días laborables' },
+  { icon: Truck, text: 'Envío 2–5 días' },
+  { icon: RotateCcw, text: 'Devolución 30 días' },
+  { icon: CreditCard, text: 'Pago seguro' },
+  { icon: MapPin, text: 'España e Islas' },
 ];
-
-// Double the items for seamless loop
-const scrollItems = [...items, ...items];
 
 export function TrustBar() {
   return (
-    <div className="bg-foreground text-background overflow-hidden">
-      <div className="relative flex whitespace-nowrap py-2">
-        <div className="animate-marquee flex items-center gap-10 px-4">
-          {scrollItems.map(({ icon: Icon, text }, i) => (
-            <div key={i} className="flex items-center gap-2 shrink-0">
-              <Icon className="h-4 w-4 shrink-0" />
-              <span className="text-xs font-medium sm:text-sm">{text}</span>
-            </div>
-          ))}
-        </div>
-        <div className="animate-marquee2 absolute top-0 flex items-center gap-10 px-4 py-2">
-          {scrollItems.map(({ icon: Icon, text }, i) => (
-            <div key={i} className="flex items-center gap-2 shrink-0">
-              <Icon className="h-4 w-4 shrink-0" />
-              <span className="text-xs font-medium sm:text-sm">{text}</span>
-            </div>
-          ))}
-        </div>
+    <div className="bg-foreground text-background">
+      <div className="mx-auto flex max-w-7xl items-center justify-center gap-6 px-4 py-2 sm:gap-10">
+        {items.map(({ icon: Icon, text }) => (
+          <div key={text} className="flex items-center gap-1.5 shrink-0">
+            <Icon className="h-3.5 w-3.5 shrink-0 opacity-70" />
+            <span className="text-[11px] font-medium sm:text-xs">{text}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
