@@ -211,7 +211,7 @@ export default function ProductPage() {
               )}
             </div>
             {savings && (
-              <p className="text-sm font-medium text-green-600">¡Ahorras €{savings}!</p>
+              <p className="text-sm font-medium" style={{ color: 'hsl(142, 60%, 40%)' }}>¡Ahorras €{savings}!</p>
             )}
 
             {/* Stock */}

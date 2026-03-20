@@ -153,7 +153,7 @@ export function useSaveCategory() {
       } else {
         const { data: created, error } = await supabase
           .from('categories')
-          .insert(data)
+          .insert(data as any)
           .select()
           .single();
         if (error) throw error;

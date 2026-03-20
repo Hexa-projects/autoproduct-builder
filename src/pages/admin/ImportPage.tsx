@@ -185,7 +185,7 @@ export default function ImportPage() {
                     <TableRow key={i} className={!r.valid ? 'opacity-50' : ''}>
                       <TableCell>
                         {r.valid ? (
-                          <Check className="h-4 w-4 text-green-600" />
+                          <Check className="h-4 w-4" style={{ color: 'hsl(var(--success))' }} />
                         ) : (
                           <span className="flex items-center gap-1 text-destructive text-xs">
                             <X className="h-4 w-4" /> {r.error}
