@@ -61,11 +61,8 @@ export function Header() {
             </SheetTrigger>
             <SheetContent side="left" className="w-72 p-0">
               <SheetTitle className="sr-only">Menú de navegación</SheetTitle>
-              <div className="flex h-14 items-center justify-between border-b px-4">
+              <div className="flex h-14 items-center border-b px-4">
                 <img src={logo} alt="Revolución Fit" className="h-8" />
-                <Button variant="ghost" size="icon" onClick={() => setOpen(false)}>
-                  <X className="h-5 w-5" />
-                </Button>
               </div>
               {/* Mobile search */}
               <form onSubmit={(e) => { handleSearch(e); setOpen(false); }} className="p-4 pb-2">
