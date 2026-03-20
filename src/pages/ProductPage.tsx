@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import {
   ArrowLeft, Truck, ShieldCheck, RotateCcw, Package, ShoppingBag
 } from 'lucide-react';
+import logo from '@/assets/logo.png';
 
 function appendUTM(url: string) {
   try {
