@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { CartDrawer } from '@/components/CartDrawer';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Search } from 'lucide-react';
 import logo from '@/assets/logo.png';
 
 const navLinks = [
@@ -15,33 +16,40 @@ const navLinks = [
 
 export function Header() {
   const [open, setOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/colecciones?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery('');
+    }
+  };
 
   return (
     <header className="sticky top-0 z-40 border-b bg-card/95 backdrop-blur-md">
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:h-16">
+      {/* Top row: logo, search, cart */}
+      <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-4 sm:h-16">
         <Link to="/" className="flex shrink-0 items-center">
           <img src={logo} alt="Revolución Fit" className="h-8 sm:h-10" />
         </Link>
 
-        {/* Desktop nav */}
-        <nav className="hidden items-center gap-1 md:flex">
-          {navLinks.map((link) => (
-            <Link
-              key={link.to}
-              to={link.to}
-              className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                location.pathname === link.to
-                  ? 'bg-secondary text-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+        {/* Desktop search */}
+        <form onSubmit={handleSearch} className="hidden flex-1 md:flex md:max-w-md lg:max-w-lg mx-auto">
+          <div className="relative w-full">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="¿Qué estás buscando?"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 bg-secondary/50 border-0 focus-visible:ring-1"
+            />
+          </div>
+        </form>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 ml-auto">
           <CartDrawer />
 
           {/* Mobile menu */}
@@ -59,7 +67,19 @@ export function Header() {
                   <X className="h-5 w-5" />
                 </Button>
               </div>
-              <nav className="flex flex-col gap-1 p-4">
+              {/* Mobile search */}
+              <form onSubmit={(e) => { handleSearch(e); setOpen(false); }} className="p-4 pb-2">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    placeholder="Buscar..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
+              </form>
+              <nav className="flex flex-col gap-1 p-4 pt-2">
                 {navLinks.map((link) => (
                   <Link
                     key={link.to}
@@ -79,6 +99,25 @@ export function Header() {
           </Sheet>
         </div>
       </div>
+
+      {/* Bottom row: navigation links (desktop) */}
+      <nav className="hidden border-t md:block">
+        <div className="mx-auto flex max-w-7xl items-center gap-1 px-4">
+          {navLinks.map((link) => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className={`px-4 py-2.5 text-sm font-medium transition-colors ${
+                location.pathname === link.to
+                  ? 'border-b-2 border-foreground text-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </div>
+      </nav>
     </header>
   );
 }
