@@ -54,9 +54,8 @@ export default function Index() {
             style={{ maxHeight: '520px' }}
           />
         </div>
-        <div className="md:hidden grid grid-cols-2">
-          <img src={bannerMobileHombre} alt="Revolución Fit Hombre" className="w-full object-cover aspect-[3/4]" />
-          <img src={bannerMobileMujer} alt="Revolución Fit Mujer" className="w-full object-cover aspect-[3/4]" />
+        <div className="md:hidden">
+          <img src={bannerMobile} alt="Revolución Fit — Entrena con confianza" className="w-full object-cover aspect-[3/4]" />
         </div>
         {/* CTA overlay */}
         <div className="absolute inset-0 flex items-end justify-center pb-8 sm:pb-12">
