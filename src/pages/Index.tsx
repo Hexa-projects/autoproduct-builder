@@ -7,8 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, ShoppingBag, Dumbbell, Heart, Sparkles, Shield, Star } from 'lucide-react';
 import bannerDesktop from '@/assets/banner-desktop.png';
-import bannerMobileHombre from '@/assets/banner-mobile-hombre.png';
-import bannerMobileMujer from '@/assets/banner-mobile-mujer.png';
+import bannerMobile from '@/assets/banner-mobile.png';
 
 const categoryBlocks = [
   {
