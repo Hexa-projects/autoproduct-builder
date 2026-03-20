@@ -12,9 +12,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import {
   Truck, ShieldCheck, RotateCcw, ShoppingBag, Loader2, Check,
-  Package, CreditCard, ChevronLeft, ChevronRight, ShoppingCart,
+  Package, CreditCard, ChevronLeft, ChevronRight, ShoppingCart, MapPin,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { trackViewContent, trackAddToCart } from '@/lib/tracking';
 
 const generalFAQ = [
   { q: '¿Cuánto tarda el envío?', a: 'Los pedidos se procesan en 24h y el envío estándar tarda 2-5 días laborables en España y Portugal.' },
@@ -52,12 +53,11 @@ export default function ProductPage() {
 
   // Track ViewContent
   useEffect(() => {
-    if (product && typeof window !== 'undefined' && (window as any).fbq) {
-      (window as any).fbq('track', 'ViewContent', {
-        content_name: product.title,
-        content_ids: [product.id],
-        content_type: 'product',
-        value: parseFloat(product.priceRange.minVariantPrice.amount),
+    if (product) {
+      trackViewContent({
+        id: product.id,
+        title: product.title,
+        price: parseFloat(product.priceRange.minVariantPrice.amount),
         currency: product.priceRange.minVariantPrice.currencyCode,
       });
     }
@@ -134,6 +134,13 @@ export default function ProductPage() {
       price: selectedVariant.price,
       quantity: 1,
       selectedOptions: selectedVariant.selectedOptions || [],
+    });
+    trackAddToCart({
+      id: selectedVariant.id,
+      title: product.title,
+      price: parseFloat(selectedVariant.price.amount),
+      currency: selectedVariant.price.currencyCode,
+      quantity: 1,
     });
     toast.success('Añadido al carrito', { description: product.title });
   };
@@ -339,7 +346,7 @@ export default function ProductPage() {
               {/* CTA */}
               <Button
                 size="lg"
-                className="w-full text-base font-semibold shadow-md active:scale-[0.97] transition-transform gap-2"
+                className="w-full min-h-[48px] text-base font-semibold shadow-md active:scale-[0.97] transition-transform gap-2"
                 onClick={handleAddToCart}
                 disabled={!product.availableForSale || !selectedVariant?.availableForSale || isCartLoading}
               >
@@ -383,10 +390,16 @@ export default function ProductPage() {
                   Descripción
                 </TabsTrigger>
                 <TabsTrigger
+                  value="shipping"
+                  className="rounded-none border-b-2 border-transparent px-6 py-3 text-sm font-medium data-[state=active]:border-foreground data-[state=active]:shadow-none"
+                >
+                  Envío y devolución
+                </TabsTrigger>
+                <TabsTrigger
                   value="faq"
                   className="rounded-none border-b-2 border-transparent px-6 py-3 text-sm font-medium data-[state=active]:border-foreground data-[state=active]:shadow-none"
                 >
-                  Preguntas frecuentes
+                  FAQ
                 </TabsTrigger>
               </TabsList>
 
@@ -401,6 +414,47 @@ export default function ProductPage() {
                     No hay descripción disponible para este producto.
                   </p>
                 )}
+              </TabsContent>
+
+              <TabsContent value="shipping" className="mt-6">
+                <div className="space-y-6">
+                  <div className="flex items-start gap-3">
+                    <Truck className="h-5 w-5 shrink-0 text-accent mt-0.5" />
+                    <div>
+                      <p className="text-sm font-semibold">Envío estándar (2–5 días laborables)</p>
+                      <p className="text-sm text-muted-foreground">
+                        Disponible para España peninsular, Baleares, Canarias y Portugal. Los pedidos se procesan en 24 horas.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <MapPin className="h-5 w-5 shrink-0 text-accent mt-0.5" />
+                    <div>
+                      <p className="text-sm font-semibold">Seguimiento incluido</p>
+                      <p className="text-sm text-muted-foreground">
+                        Recibirás un email con el número de seguimiento en cuanto tu pedido sea enviado.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <RotateCcw className="h-5 w-5 shrink-0 text-accent mt-0.5" />
+                    <div>
+                      <p className="text-sm font-semibold">Devolución gratuita en 30 días</p>
+                      <p className="text-sm text-muted-foreground">
+                        Si no estás satisfecho, solicita la devolución sin coste. Recogemos el paquete en tu domicilio.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <ShieldCheck className="h-5 w-5 shrink-0 text-accent mt-0.5" />
+                    <div>
+                      <p className="text-sm font-semibold">Pago 100% seguro</p>
+                      <p className="text-sm text-muted-foreground">
+                        Visa, Mastercard, PayPal y Google Pay. Todos los pagos están cifrados con SSL.
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </TabsContent>
 
               <TabsContent value="faq" className="mt-6">
@@ -444,7 +498,7 @@ export default function ProductPage() {
             </p>
           </div>
           <Button
-            className="shrink-0 active:scale-[0.97] gap-2"
+            className="shrink-0 min-h-[48px] active:scale-[0.97] gap-2 px-6"
             onClick={handleAddToCart}
             disabled={!product.availableForSale || !selectedVariant?.availableForSale || isCartLoading}
           >
