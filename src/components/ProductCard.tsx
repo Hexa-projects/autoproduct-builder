@@ -9,9 +9,11 @@ import type { ShopifyProduct } from '@/lib/shopify';
 
 interface ProductCardProps {
   product: ShopifyProduct;
+  /** Show "Top ventas" badge on this card */
+  isBestSeller?: boolean;
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, isBestSeller }: ProductCardProps) {
   const p = product.node;
   const addItem = useCartStore((s) => s.addItem);
   const isCartLoading = useCartStore((s) => s.isLoading);
@@ -25,7 +27,6 @@ export function ProductCard({ product }: ProductCardProps) {
   const hoverImage = p.images.edges[1]?.node;
   const isAvailable = p.availableForSale;
 
-  // Check stock level from variants
   const availableVariants = p.variants.edges.filter((v) => v.node.availableForSale);
   const hasMultipleVariants = p.variants.edges.length > 1 && p.options.some(o => o.name !== 'Title' || o.values.length > 1);
 
@@ -88,9 +89,9 @@ export function ProductCard({ product }: ProductCardProps) {
               -{discount}%
             </Badge>
           )}
-          {isAvailable && (
+          {isBestSeller && (
             <Badge variant="secondary" className="text-xs font-medium shadow-sm">
-              Más vendido
+              Top ventas
             </Badge>
           )}
         </div>
@@ -128,8 +129,8 @@ export function ProductCard({ product }: ProductCardProps) {
       <div className="flex flex-1 flex-col p-4">
         {/* Stock indicator */}
         <div className="mb-1.5 flex items-center gap-1.5">
-          <div className={`h-1.5 w-1.5 rounded-full ${isAvailable ? 'bg-accent' : 'bg-destructive'}`} />
-          <span className="text-[11px] font-medium text-muted-foreground">
+          <div className={`h-1.5 w-1.5 rounded-full ${isAvailable ? (availableVariants.length <= 3 ? 'bg-warning' : 'bg-accent') : 'bg-destructive'}`} />
+          <span className={`text-[11px] font-medium ${!isAvailable ? 'text-destructive' : availableVariants.length <= 3 ? 'text-warning-foreground' : 'text-muted-foreground'}`}>
             {!isAvailable ? 'Agotado' : availableVariants.length <= 3 ? 'Últimas unidades' : 'En existencias'}
           </span>
         </div>
@@ -146,6 +147,11 @@ export function ProductCard({ product }: ProductCardProps) {
           <span className={`text-lg font-bold tabular-nums ${hasDiscount ? 'text-destructive' : ''}`}>
             €{price.toFixed(2)}
           </span>
+          {hasDiscount && savings(price, compareAt) && (
+            <span className="text-[11px] font-semibold text-accent">
+              Ahorras €{(compareAt - price).toFixed(2)}
+            </span>
+          )}
         </div>
 
         {/* Variant options preview */}
@@ -174,4 +180,8 @@ export function ProductCard({ product }: ProductCardProps) {
       </div>
     </Link>
   );
+}
+
+function savings(price: number, compareAt: number): boolean {
+  return compareAt > price;
 }

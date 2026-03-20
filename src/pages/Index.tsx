@@ -5,7 +5,10 @@ import { ProductCard } from '@/components/ProductCard';
 import { ScrollReveal } from '@/components/ScrollReveal';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, ShoppingBag, Dumbbell, Heart, Sparkles, Shield, Star } from 'lucide-react';
+import {
+  ArrowRight, ShoppingBag, Dumbbell, Heart, Sparkles,
+  Shield, Star, Truck, RotateCcw, ShieldCheck, Zap,
+} from 'lucide-react';
 import bannerDesktop from '@/assets/banner-desktop.png';
 import bannerMobile from '@/assets/banner-mobile.png';
 
@@ -30,10 +33,22 @@ const categoryBlocks = [
   },
 ];
 
-const valueProps = [
-  { icon: Star, title: 'Calidad probada', desc: 'Materiales de alta durabilidad para uso diario.' },
-  { icon: Shield, title: 'Compra segura', desc: 'Pago encriptado y protección al comprador.' },
-  { icon: Heart, title: 'Satisfacción garantizada', desc: 'Devolución gratuita en 30 días.' },
+const whyBuyReasons = [
+  {
+    icon: ShieldCheck,
+    title: 'Productos testados',
+    desc: 'Cada artículo pasa un control de calidad antes de llegar a tu puerta.',
+  },
+  {
+    icon: RotateCcw,
+    title: 'Devolución sin excusas',
+    desc: '30 días para devolver gratis, sin preguntas ni complicaciones.',
+  },
+  {
+    icon: Truck,
+    title: 'Envío rápido a toda España',
+    desc: 'Península e islas. Recíbelo en 2–5 días laborables.',
+  },
 ];
 
 export default function Index() {
@@ -41,6 +56,13 @@ export default function Index() {
   const { data: collections } = useShopifyCollections();
 
   const featuredProducts = products?.slice(0, 8) || [];
+
+  // Pick the first product with a discount as "offer of the week"
+  const offerProduct = products?.find((p) => {
+    const price = parseFloat(p.node.priceRange.minVariantPrice.amount);
+    const compare = parseFloat(p.node.compareAtPriceRange.minVariantPrice.amount);
+    return compare > price;
+  });
 
   return (
     <Layout>
@@ -58,12 +80,25 @@ export default function Index() {
           <img src={bannerMobile} alt="Revolución Fit — Entrena con confianza" className="w-full object-cover aspect-[3/4]" />
         </div>
         {/* CTA overlay */}
-        <div className="absolute inset-0 flex items-end justify-center pb-8 sm:pb-12">
-          <Button size="lg" asChild className="shadow-lg text-base font-semibold active:scale-[0.97]">
-            <Link to="/colecciones">
-              Ver colecciones <ArrowRight className="h-4 w-4 ml-1" />
-            </Link>
-          </Button>
+        <div className="absolute inset-0 flex flex-col items-center justify-end gap-3 pb-8 sm:pb-12">
+          <p className="text-background/80 text-xs font-medium tracking-wide sm:text-sm">
+            Envío rápido · Devolución 30 días · Pago seguro
+          </p>
+          <div className="flex items-center gap-3">
+            <Button size="lg" asChild className="shadow-lg text-base font-semibold active:scale-[0.97]">
+              <Link to="/colecciones">
+                Comprar ahora <ArrowRight className="h-4 w-4 ml-1" />
+              </Link>
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              asChild
+              className="shadow-lg text-base font-semibold active:scale-[0.97] border-background/30 text-background hover:bg-background/10 hover:text-background"
+            >
+              <Link to="/colecciones">Ver catálogo</Link>
+            </Button>
+          </div>
         </div>
       </section>
 
@@ -124,8 +159,61 @@ export default function Index() {
         </div>
       </section>
 
+      {/* ── Oferta de la semana ── */}
+      {offerProduct && (
+        <section className="border-y bg-secondary/40">
+          <div className="mx-auto max-w-7xl px-4 py-10 sm:py-14">
+            <ScrollReveal>
+              <div className="flex flex-col items-center gap-6 sm:flex-row sm:gap-10">
+                {/* Image */}
+                <Link
+                  to={`/products/${offerProduct.node.handle}`}
+                  className="w-full max-w-xs shrink-0 overflow-hidden rounded-xl border bg-card shadow-sm transition-shadow hover:shadow-md active:scale-[0.98]"
+                >
+                  {offerProduct.node.images.edges[0]?.node && (
+                    <img
+                      src={offerProduct.node.images.edges[0].node.url}
+                      alt={offerProduct.node.title}
+                      className="aspect-square w-full object-cover"
+                      loading="lazy"
+                    />
+                  )}
+                </Link>
+                {/* Copy */}
+                <div className="flex-1 text-center sm:text-left">
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-destructive/10 px-3 py-1 text-xs font-semibold text-destructive">
+                    <Zap className="h-3.5 w-3.5" />
+                    Oferta de la semana
+                  </div>
+                  <h2 className="mt-3 text-2xl font-bold tracking-tight sm:text-3xl" style={{ lineHeight: '1.1' }}>
+                    {offerProduct.node.title}
+                  </h2>
+                  <div className="mt-3 flex items-baseline justify-center gap-3 sm:justify-start">
+                    <span className="text-3xl font-bold text-destructive tabular-nums">
+                      {parseFloat(offerProduct.node.priceRange.minVariantPrice.amount).toFixed(2)} €
+                    </span>
+                    <span className="text-lg text-muted-foreground line-through tabular-nums">
+                      {parseFloat(offerProduct.node.compareAtPriceRange.minVariantPrice.amount).toFixed(2)} €
+                    </span>
+                  </div>
+                  <p className="mt-2 text-sm text-muted-foreground max-w-md mx-auto sm:mx-0">
+                    {offerProduct.node.description.slice(0, 120)}
+                    {offerProduct.node.description.length > 120 ? '…' : ''}
+                  </p>
+                  <Button asChild size="lg" className="mt-5 active:scale-[0.97] gap-1.5">
+                    <Link to={`/products/${offerProduct.node.handle}`}>
+                      Ver oferta <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </ScrollReveal>
+          </div>
+        </section>
+      )}
+
       {/* Popular categories */}
-      <section className="border-y bg-card">
+      <section className="border-b bg-card">
         <div className="mx-auto max-w-7xl px-4 py-10 sm:py-14">
           <ScrollReveal>
             <h2 className="text-center text-2xl font-bold tracking-tight sm:text-3xl" style={{ lineHeight: '1.1' }}>
@@ -155,28 +243,27 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Brand story / value proposition */}
+      {/* ── Por qué comprar con Revolución Fit ── */}
       <section className="bg-foreground text-background">
         <div className="mx-auto max-w-7xl px-4 py-14 sm:py-20">
           <ScrollReveal>
             <h2 className="text-center text-2xl font-bold tracking-tight sm:text-3xl" style={{ lineHeight: '1.1' }}>
-              Tu tienda de fitness de confianza
+              Por qué comprar con Revolución Fit
             </h2>
             <p className="mx-auto mt-3 max-w-2xl text-center text-background/70 text-sm sm:text-base">
-              En Revolución Fit ofrecemos equipamiento diseñado para mejorar tu comodidad y rendimiento en cada sesión.
-              Calidad, funcionalidad y precios accesibles para que te centres en lo que importa: tu entrenamiento.
+              Equipamiento seleccionado para mejorar tu comodidad y rendimiento. Sin letra pequeña.
             </p>
           </ScrollReveal>
 
           <div className="mt-10 grid gap-6 sm:grid-cols-3">
-            {valueProps.map((vp, i) => (
-              <ScrollReveal key={vp.title} delay={i * 0.08}>
+            {whyBuyReasons.map((r, i) => (
+              <ScrollReveal key={r.title} delay={i * 0.08}>
                 <div className="flex flex-col items-center text-center">
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-background/10">
-                    <vp.icon className="h-6 w-6" />
+                    <r.icon className="h-6 w-6" />
                   </div>
-                  <h3 className="mt-3 font-semibold">{vp.title}</h3>
-                  <p className="mt-1 text-sm text-background/60">{vp.desc}</p>
+                  <h3 className="mt-3 font-semibold">{r.title}</h3>
+                  <p className="mt-1 text-sm text-background/60">{r.desc}</p>
                 </div>
               </ScrollReveal>
             ))}
