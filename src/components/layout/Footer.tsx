@@ -10,7 +10,6 @@ const footerLinks = {
     { label: 'Soporte y Postura', to: '/colecciones/soporte-postura' },
     { label: 'Recuperación', to: '/colecciones/recuperacion' },
     { label: 'Accesorios Gym', to: '/colecciones/accesorios' },
-    { label: 'Ofertas', to: '/colecciones/ofertas' },
     { label: 'Todos los productos', to: '/colecciones' },
   ],
   Ayuda: [

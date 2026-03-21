@@ -10,7 +10,6 @@ import logo from '@/assets/logo.png';
 const navLinks = [
   { label: 'Inicio', to: '/' },
   { label: 'Colecciones', to: '/colecciones' },
-  { label: 'Ofertas', to: '/colecciones/ofertas' },
   { label: 'Contacto', to: '/contacto' },
 ];
 
