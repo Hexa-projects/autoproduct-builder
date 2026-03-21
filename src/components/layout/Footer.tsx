@@ -1,9 +1,6 @@
 import { Link } from 'react-router-dom';
 import logo from '@/assets/logo.png';
-import visaIcon from '@/assets/visa.svg';
-import mastercardIcon from '@/assets/mastercard.svg';
-import googlePayIcon from '@/assets/google-pay.svg';
-import { Truck, RotateCcw, ShieldCheck, CreditCard } from 'lucide-react';
+import { Truck, RotateCcw, ShieldCheck, Banknote, Phone } from 'lucide-react';
 
 const footerLinks = {
   Categorías: [
@@ -26,17 +23,11 @@ const footerLinks = {
   ],
 };
 
-const paymentMethods = [
-  { src: visaIcon, alt: 'Visa' },
-  { src: mastercardIcon, alt: 'Mastercard' },
-  { src: googlePayIcon, alt: 'Google Pay' },
-];
-
 const trustItems = [
+  { icon: Banknote, text: 'Pago Contra Reembolso' },
   { icon: Truck, text: 'Envío 2–5 días' },
   { icon: RotateCcw, text: 'Devolución 30 días' },
-  { icon: ShieldCheck, text: 'Pago 100% seguro' },
-  { icon: CreditCard, text: 'Pago a plazos' },
+  { icon: Phone, text: 'Atención en español' },
 ];
 
 export function Footer() {
@@ -60,15 +51,8 @@ export function Footer() {
           <div className="lg:col-span-2">
             <img src={logo} alt="Revolución Fit" className="mb-4 h-8 brightness-0 invert" />
             <p className="text-sm leading-relaxed text-background/70 max-w-xs">
-              Equipamiento fitness de calidad para mejorar tu rendimiento y comodidad en cada entrenamiento.
+              Equipamiento fitness de calidad con pago contra reembolso. Compra sin riesgo: recibes primero, pagas después.
             </p>
-            <div className="mt-5 flex items-center gap-3">
-              {paymentMethods.map((pm) => (
-                <div key={pm.alt} className="rounded bg-background/10 p-1.5">
-                  <img src={pm.src} alt={pm.alt} className="h-6 w-auto" />
-                </div>
-              ))}
-            </div>
           </div>
 
           {/* Link columns */}
