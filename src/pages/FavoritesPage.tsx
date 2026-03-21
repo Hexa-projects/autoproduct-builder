@@ -1,6 +1,6 @@
 import { Layout } from '@/components/layout/Layout';
 import { useFavoritesStore } from '@/stores/favoritesStore';
-import { useShopify } from '@/hooks/useShopify';
+import { useShopifyProducts } from '@/hooks/useShopify';
 import { Heart, ShoppingBag } from 'lucide-react';
 import { ProductCard } from '@/components/ProductCard';
 import { Link } from 'react-router-dom';
