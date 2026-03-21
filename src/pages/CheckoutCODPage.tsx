@@ -138,6 +138,38 @@ export default function CheckoutCODPage() {
 
       if (error) throw error;
 
+      // Create order in Shopify
+      try {
+        const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+        const shopifyRes = await fetch(
+          `https://${projectId}.supabase.co/functions/v1/create-shopify-order`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              customer_name: form.customer_name.trim(),
+              customer_phone: form.customer_phone.trim(),
+              customer_email: form.customer_email?.trim() || null,
+              address: form.address.trim(),
+              city: form.city.trim(),
+              postal_code: form.postal_code.trim(),
+              province: form.province.trim(),
+              country: form.country.trim(),
+              items: orderItems,
+              total: totalPrice,
+              shipping_cost: 0,
+              notes: notesWithTime || null,
+            }),
+          }
+        );
+        const shopifyData = await shopifyRes.json();
+        if (!shopifyRes.ok) {
+          console.error('Shopify order sync failed:', shopifyData);
+        }
+      } catch (shopifyErr) {
+        console.error('Shopify order sync error:', shopifyErr);
+      }
+
       setOrderPlaced(true);
       clearCart();
       toast.success('¡Pedido realizado con éxito!');
