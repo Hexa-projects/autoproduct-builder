@@ -115,7 +115,7 @@ export function ProductCard({ product, isBestSeller }: ProductCardProps) {
         {isAvailable && !hasMultipleVariants && (
           <Button
             size="sm"
-            className={`absolute bottom-3 right-3 gap-1.5 shadow-md transition-all duration-300 ${
+            className={`absolute bottom-3 right-3 gap-1.5 shadow-md transition-all duration-300 bg-accent text-accent-foreground hover:bg-accent/90 ${
               hovering ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
             }`}
             onClick={handleQuickAdd}
