@@ -3,27 +3,24 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { ShoppingCart, Minus, Plus, Trash2, ExternalLink, Loader2, Banknote } from "lucide-react";
+import { ShoppingCart, Minus, Plus, Trash2, Loader2, Banknote } from "lucide-react";
 import { useCartStore } from "@/stores/cartStore";
 import { trackInitiateCheckout } from "@/lib/tracking";
 
 export function CartDrawer() {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
-  const { items, isLoading, isSyncing, updateQuantity, removeItem, getCheckoutUrl, syncCart } = useCartStore();
+  const { items, isLoading, isSyncing, updateQuantity, removeItem, syncCart } = useCartStore();
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = items.reduce((sum, item) => sum + (parseFloat(item.price.amount) * item.quantity), 0);
   const currency = items[0]?.price.currencyCode || 'EUR';
 
   useEffect(() => { if (isOpen) syncCart(); }, [isOpen, syncCart]);
 
-  const handleCheckout = () => {
-    const checkoutUrl = getCheckoutUrl();
-    if (checkoutUrl) {
-      trackInitiateCheckout({ value: totalPrice, currency, numItems: totalItems });
-      window.open(checkoutUrl, '_blank');
-      setIsOpen(false);
-    }
+  const handleCODCheckout = () => {
+    trackInitiateCheckout({ value: totalPrice, currency, numItems: totalItems });
+    setIsOpen(false);
+    navigate('/checkout/cod');
   };
 
   return (
@@ -92,22 +89,21 @@ export function CartDrawer() {
                   <span className="font-semibold">Total</span>
                   <span className="text-xl font-bold tabular-nums">€{totalPrice.toFixed(2)}</span>
                 </div>
-                <Button onClick={handleCheckout} className="w-full" size="lg" disabled={items.length === 0 || isLoading || isSyncing}>
+                <Button
+                  onClick={handleCODCheckout}
+                  className="w-full gap-2"
+                  size="lg"
+                  disabled={items.length === 0 || isLoading || isSyncing}
+                >
                   {isLoading || isSyncing ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
-                    <><ExternalLink className="w-4 h-4 mr-2" />Pagar online</>
+                    <><Banknote className="w-4 h-4" /> Pagar contra entrega</>
                   )}
                 </Button>
-                <Button
-                  variant="outline"
-                  className="w-full gap-2"
-                  size="lg"
-                  onClick={() => { setIsOpen(false); navigate('/checkout/cod'); }}
-                  disabled={items.length === 0}
-                >
-                  <Banknote className="w-4 h-4" /> Pago contra entrega
-                </Button>
+                <p className="text-xs text-center text-muted-foreground">
+                  💰 Pagas cuando recibes tu pedido en casa
+                </p>
               </div>
             </>
           )}
