@@ -25,6 +25,7 @@ import AccountRegisterPage from "./pages/account/RegisterPage";
 import AccountRecoverPage from "./pages/account/RecoverPage";
 import AccountResetPasswordPage from "./pages/account/ResetPasswordPage";
 import AccountPage from "./pages/account/AccountPage";
+import FavoritesPage from "./pages/FavoritesPage";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ function AppContent() {
         <Route path="/colecciones/:handle" element={<CatalogPage />} />
         <Route path="/contacto" element={<ContactPage />} />
         <Route path="/checkout/cod" element={<CheckoutCODPage />} />
+        <Route path="/favoritos" element={<FavoritesPage />} />
         <Route path="/account/login" element={<AccountLoginPage />} />
         <Route path="/account/register" element={<AccountRegisterPage />} />
         <Route path="/account/recover" element={<AccountRecoverPage />} />

@@ -4,7 +4,8 @@ import { CartDrawer } from '@/components/CartDrawer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
-import { Menu, Search, UserCircle } from 'lucide-react';
+import { Menu, Search, UserCircle, Heart } from 'lucide-react';
+import { useFavoritesStore } from '@/stores/favoritesStore';
 import { supabase } from '@/integrations/supabase/client';
 import logo from '@/assets/logo.png';
 
@@ -56,6 +57,12 @@ export function Header() {
         </form>
 
         <div className="flex items-center gap-1.5 ml-auto sm:gap-2">
+          <Link to="/favoritos">
+            <Button variant="ghost" size="icon" className="relative h-9 w-9" aria-label="Favoritos">
+              <Heart className="h-5 w-5" />
+              <FavBadge />
+            </Button>
+          </Link>
           <Link to={loggedIn ? '/account' : '/account/login'}>
             <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="Mi cuenta">
               <UserCircle className="h-5 w-5" />
