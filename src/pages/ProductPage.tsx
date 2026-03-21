@@ -247,12 +247,12 @@ export default function ProductPage() {
                 )}
               </div>
               {allImages.length > 1 && (
-                <div className="flex gap-2 overflow-auto pb-1">
+                <div className="flex gap-1.5 overflow-auto pb-1 sm:gap-2">
                   {allImages.map((img, i) => (
                     <button
                       key={i}
                       onClick={() => setSelectedImage(i)}
-                      className={`h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 transition-colors ${
+                      className={`h-12 w-12 shrink-0 overflow-hidden rounded-md border-2 transition-colors sm:h-16 sm:w-16 sm:rounded-lg ${
                         i === selectedImage ? 'border-foreground' : 'border-transparent hover:border-muted-foreground/30'
                       }`}
                     >
