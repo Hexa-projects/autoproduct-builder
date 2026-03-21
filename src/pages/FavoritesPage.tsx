@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 
 export default function FavoritesPage() {
   const ids = useFavoritesStore((s) => s.ids);
-  const { products, loading } = useShopify();
+  const { data: products, isLoading: loading } = useShopifyProducts();
 
   const favorites = products?.filter((p) => ids.includes(p.node.handle)) ?? [];
 
