@@ -11,9 +11,11 @@ serve(async (req) => {
   }
 
   try {
-    const SHOPIFY_ACCESS_TOKEN = Deno.env.get('SHOPIFY_ACCESS_TOKEN');
+    // Try online access token first, then fall back to regular access token
+    const SHOPIFY_ACCESS_TOKEN = Deno.env.get('SHOPIFY_ONLINE_ACCESS_TOKEN:user:AMFaps0wAvQz8E1PIhZF0BRko2u2') 
+      || Deno.env.get('SHOPIFY_ACCESS_TOKEN');
     if (!SHOPIFY_ACCESS_TOKEN) {
-      throw new Error('SHOPIFY_ACCESS_TOKEN not configured');
+      throw new Error('No Shopify access token configured');
     }
 
     const SHOP_DOMAIN = 't5mqfi-s1.myshopify.com';
