@@ -4,7 +4,7 @@ import { CartDrawer } from '@/components/CartDrawer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
-import { Menu, X, Search } from 'lucide-react';
+import { Menu, Search } from 'lucide-react';
 import logo from '@/assets/logo.png';
 
 const navLinks = [
@@ -29,10 +29,9 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-40 border-b bg-card/95 backdrop-blur-md">
-      {/* Top row: logo, search, cart */}
-      <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-4 sm:h-16">
+      <div className="mx-auto flex h-14 max-w-7xl items-center gap-2 px-3 sm:gap-4 sm:px-4 sm:h-16">
         <Link to="/" className="flex shrink-0 items-center">
-          <img src={logo} alt="Revolución Fit" className="h-8 sm:h-10" />
+          <img src={logo} alt="Revolución Fit" className="h-7 sm:h-10" />
         </Link>
 
         {/* Desktop search */}
@@ -48,20 +47,20 @@ export function Header() {
           </div>
         </form>
 
-        <div className="flex items-center gap-2 ml-auto">
+        <div className="flex items-center gap-1.5 ml-auto sm:gap-2">
           <CartDrawer />
 
           {/* Mobile menu */}
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
+              <Button variant="ghost" size="icon" className="md:hidden h-9 w-9">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-72 p-0">
+            <SheetContent side="left" className="w-[280px] max-w-[85vw] p-0">
               <SheetTitle className="sr-only">Menú de navegación</SheetTitle>
               <div className="flex h-14 items-center border-b px-4">
-                <img src={logo} alt="Revolución Fit" className="h-8" />
+                <img src={logo} alt="Revolución Fit" className="h-7" />
               </div>
               {/* Mobile search */}
               <form onSubmit={(e) => { handleSearch(e); setOpen(false); }} className="p-4 pb-2">

@@ -10,7 +10,6 @@ import type { ShopifyProduct } from '@/lib/shopify';
 
 interface ProductCardProps {
   product: ShopifyProduct;
-  /** Show "Top ventas" badge on this card */
   isBestSeller?: boolean;
 }
 
@@ -28,7 +27,6 @@ export function ProductCard({ product, isBestSeller }: ProductCardProps) {
   const hoverImage = p.images.edges[1]?.node;
   const isAvailable = p.availableForSale;
 
-  const availableVariants = p.variants.edges.filter((v) => v.node.availableForSale);
   const hasMultipleVariants = p.variants.edges.length > 1 && p.options.some(o => o.name !== 'Title' || o.values.length > 1);
 
   const handleQuickAdd = async (e: React.MouseEvent) => {
@@ -57,7 +55,7 @@ export function ProductCard({ product, isBestSeller }: ProductCardProps) {
   return (
     <Link
       to={`/products/${p.handle}`}
-      className="group relative flex flex-col overflow-hidden rounded-xl border bg-card transition-shadow duration-300 hover:shadow-lg active:scale-[0.98]"
+      className="group relative flex flex-col overflow-hidden rounded-lg border bg-card transition-shadow duration-300 hover:shadow-lg active:scale-[0.98]"
       onMouseEnter={() => setHovering(true)}
       onMouseLeave={() => setHovering(false)}
     >
@@ -86,46 +84,46 @@ export function ProductCard({ product, isBestSeller }: ProductCardProps) {
           </>
         ) : (
           <div className="flex h-full items-center justify-center text-muted-foreground">
-            <ShoppingBag className="h-10 w-10" />
+            <ShoppingBag className="h-8 w-8" />
           </div>
         )}
 
         {/* Badges */}
-        <div className="absolute left-3 top-3 flex flex-col gap-1.5">
+        <div className="absolute left-2 top-2 flex flex-col gap-1">
           {hasDiscount && discount > 0 && (
-            <Badge className="bg-destructive text-destructive-foreground text-xs font-semibold shadow-sm">
+            <Badge className="bg-destructive text-destructive-foreground text-[10px] font-semibold shadow-sm px-1.5 py-0.5">
               -{discount}%
             </Badge>
           )}
           {isBestSeller && (
-            <Badge variant="secondary" className="text-xs font-medium shadow-sm">
+            <Badge variant="secondary" className="text-[10px] font-medium shadow-sm px-1.5 py-0.5">
               Top ventas
             </Badge>
           )}
         </div>
 
-        {/* Out of stock overlay */}
+        {/* Out of stock */}
         {!isAvailable && (
           <div className="absolute inset-0 flex items-center justify-center bg-foreground/40">
-            <span className="rounded-md bg-card px-3 py-1 text-sm font-semibold">Agotado</span>
+            <span className="rounded-md bg-card px-2 py-0.5 text-xs font-semibold">Agotado</span>
           </div>
         )}
 
-        {/* Quick add button - shown on hover */}
+        {/* Quick add — desktop only */}
         {isAvailable && !hasMultipleVariants && (
           <Button
             size="sm"
-            className={`absolute bottom-3 right-3 gap-1.5 shadow-md transition-all duration-300 bg-accent text-accent-foreground hover:bg-accent/90 ${
+            className={`absolute bottom-2 right-2 gap-1 shadow-md transition-all duration-300 bg-accent text-accent-foreground hover:bg-accent/90 text-xs h-8 px-2.5 hidden sm:flex ${
               hovering ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
             }`}
             onClick={handleQuickAdd}
             disabled={isCartLoading}
           >
             {isCartLoading ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              <Loader2 className="h-3 w-3 animate-spin" />
             ) : (
               <>
-                <ShoppingCart className="h-3.5 w-3.5" />
+                <ShoppingCart className="h-3 w-3" />
                 Añadir
               </>
             )}
@@ -134,53 +132,52 @@ export function ProductCard({ product, isBestSeller }: ProductCardProps) {
       </div>
 
       {/* Info */}
-      <div className="flex flex-1 flex-col p-4">
-        {/* Stock indicator - only show when out of stock */}
+      <div className="flex flex-1 flex-col p-2.5 sm:p-4">
         {!isAvailable && (
-          <div className="mb-1.5 flex items-center gap-1.5">
+          <div className="mb-1 flex items-center gap-1">
             <div className="h-1.5 w-1.5 rounded-full bg-destructive" />
-            <span className="text-[11px] font-medium text-destructive">Agotado</span>
+            <span className="text-[10px] font-medium text-destructive">Agotado</span>
           </div>
         )}
 
-        <h3 className="font-semibold leading-snug text-foreground line-clamp-2 text-sm">{p.title}</h3>
+        <h3 className="font-semibold leading-snug text-foreground line-clamp-2 text-xs sm:text-sm">{p.title}</h3>
 
         {/* Price */}
-        <div className="mt-2 flex items-baseline gap-2">
+        <div className="mt-1.5 flex flex-wrap items-baseline gap-1 sm:gap-2 sm:mt-2">
           {hasDiscount && (
-            <span className="text-sm text-muted-foreground line-through tabular-nums">
+            <span className="text-[11px] text-muted-foreground line-through tabular-nums sm:text-sm">
               €{compareAt.toFixed(2)}
             </span>
           )}
-          <span className={`text-lg font-bold tabular-nums ${hasDiscount ? 'text-destructive' : ''}`}>
+          <span className={`text-sm font-bold tabular-nums sm:text-lg ${hasDiscount ? 'text-destructive' : ''}`}>
             €{price.toFixed(2)}
           </span>
-          {hasDiscount && savings(price, compareAt) && (
-            <span className="text-[11px] font-semibold text-accent">
-              Ahorras €{(compareAt - price).toFixed(2)}
-            </span>
-          )}
         </div>
+        {hasDiscount && hasSavings(price, compareAt) && (
+          <span className="text-[10px] font-semibold text-accent mt-0.5 sm:text-[11px]">
+            Ahorras €{(compareAt - price).toFixed(2)}
+          </span>
+        )}
 
-        {/* Variant options preview */}
+        {/* Variant options */}
         {hasMultipleVariants && (
-          <div className="mt-2.5 flex flex-wrap gap-1">
+          <div className="mt-2 flex flex-wrap gap-1">
             {p.options
               .filter((o) => o.name !== 'Title')
               .slice(0, 1)
               .map((option) =>
-                option.values.slice(0, 5).map((value) => (
+                option.values.slice(0, 3).map((value) => (
                   <span
                     key={value}
-                    className="rounded border px-2 py-0.5 text-[11px] font-medium text-muted-foreground"
+                    className="rounded border px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground"
                   >
                     {value}
                   </span>
                 ))
               )}
-            {p.options[0]?.values.length > 5 && (
-              <span className="rounded border px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
-                +{p.options[0].values.length - 5}
+            {p.options[0]?.values.length > 3 && (
+              <span className="rounded border px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                +{p.options[0].values.length - 3}
               </span>
             )}
           </div>
@@ -190,6 +187,6 @@ export function ProductCard({ product, isBestSeller }: ProductCardProps) {
   );
 }
 
-function savings(price: number, compareAt: number): boolean {
+function hasSavings(price: number, compareAt: number): boolean {
   return compareAt > price;
 }

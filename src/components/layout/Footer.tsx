@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import logo from '@/assets/logo.png';
-import { Truck, RotateCcw, ShieldCheck, Banknote, Phone } from 'lucide-react';
+import { Truck, RotateCcw, Banknote, Phone } from 'lucide-react';
 
 const footerLinks = {
   Categorías: [
@@ -17,9 +17,9 @@ const footerLinks = {
   ],
   Legal: [
     { label: 'Aviso legal', to: '/legal' },
-    { label: 'Política de privacidad', to: '/privacidad' },
-    { label: 'Términos y condiciones', to: '/terminos' },
-    { label: 'Política de cookies', to: '/cookies' },
+    { label: 'Privacidad', to: '/privacidad' },
+    { label: 'Términos', to: '/terminos' },
+    { label: 'Cookies', to: '/cookies' },
   ],
 };
 
@@ -35,38 +35,38 @@ export function Footer() {
     <footer className="border-t bg-foreground text-background">
       {/* Trust strip */}
       <div className="border-b border-background/10">
-        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-4 px-4 py-6 sm:grid-cols-4">
+        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-3 px-4 py-5 sm:grid-cols-4 sm:gap-4 sm:py-6">
           {trustItems.map(({ icon: Icon, text }) => (
-            <div key={text} className="flex items-center gap-2">
-              <Icon className="h-5 w-5 shrink-0 text-background/70" />
-              <span className="text-xs font-medium sm:text-sm">{text}</span>
+            <div key={text} className="flex items-center gap-1.5 sm:gap-2">
+              <Icon className="h-4 w-4 shrink-0 text-background/70 sm:h-5 sm:w-5" />
+              <span className="text-[11px] font-medium sm:text-sm">{text}</span>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl px-4 py-10">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:py-10">
+        <div className="grid gap-6 grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 sm:gap-8">
           {/* Brand */}
-          <div className="lg:col-span-2">
-            <img src={logo} alt="Revolución Fit" className="mb-4 h-8 brightness-0 invert" />
-            <p className="text-sm leading-relaxed text-background/70 max-w-xs">
-              Equipamiento fitness de calidad con pago contra reembolso. Compra sin riesgo: recibes primero, pagas después.
+          <div className="col-span-2 lg:col-span-2">
+            <img src={logo} alt="Revolución Fit" className="mb-3 h-7 brightness-0 invert sm:h-8 sm:mb-4" />
+            <p className="text-xs leading-relaxed text-background/70 max-w-xs sm:text-sm">
+              Equipamiento fitness con pago contra reembolso. Recibes primero, pagas después.
             </p>
           </div>
 
           {/* Link columns */}
           {Object.entries(footerLinks).map(([title, links]) => (
             <div key={title}>
-              <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-background/50">
+              <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-background/50 sm:mb-3 sm:text-sm">
                 {title}
               </h3>
-              <ul className="space-y-2">
+              <ul className="space-y-1.5 sm:space-y-2">
                 {links.map((link) => (
                   <li key={link.to}>
                     <Link
                       to={link.to}
-                      className="text-sm text-background/70 transition-colors hover:text-background"
+                      className="text-xs text-background/70 transition-colors hover:text-background sm:text-sm"
                     >
                       {link.label}
                     </Link>
@@ -77,7 +77,7 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="mt-10 border-t border-background/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-background/50">
+        <div className="mt-8 border-t border-background/10 pt-5 flex flex-col items-center gap-1 text-[10px] text-background/50 sm:flex-row sm:justify-between sm:text-xs sm:pt-6 sm:mt-10">
           <span>© {new Date().getFullYear()} Revolución Fit. Todos los derechos reservados.</span>
           <span>IVA incluido en todos los precios.</span>
         </div>
