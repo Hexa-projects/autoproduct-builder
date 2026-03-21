@@ -203,40 +203,62 @@ export default function CheckoutCODPage() {
 
   return (
     <Layout>
-      <div className="mx-auto max-w-4xl px-4 py-6 sm:py-8">
-        <Button variant="ghost" size="sm" className="mb-4 gap-1" onClick={() => navigate(-1)}>
+      {/* Mobile sticky total bar */}
+      <div className="fixed bottom-0 inset-x-0 z-40 bg-card border-t p-3 flex items-center justify-between lg:hidden safe-w">
+        <div>
+          <p className="text-xs text-muted-foreground">Total</p>
+          <p className="text-lg font-bold tabular-nums">€{totalPrice.toFixed(2)}</p>
+        </div>
+        {step < 2 ? (
+          <Button onClick={nextStep} className="bg-accent text-accent-foreground hover:bg-accent/90 min-h-[44px] px-6">
+            Continuar
+          </Button>
+        ) : (
+          <Button
+            onClick={handleSubmit}
+            disabled={isSubmitting || !codConfirmed || !availableConfirmed}
+            className="gap-2 bg-accent text-accent-foreground hover:bg-accent/90 min-h-[44px] px-5"
+          >
+            {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
+            Confirmar pedido
+          </Button>
+        )}
+      </div>
+
+      <div className="mx-auto max-w-4xl px-4 py-4 sm:py-8 pb-28 lg:pb-8">
+        <Button variant="ghost" size="sm" className="mb-3 gap-1" onClick={() => navigate(-1)}>
           <ArrowLeft className="h-4 w-4" /> Volver
         </Button>
 
         {/* Anti-fraud notice */}
-        <div className="mb-6 rounded-lg border border-accent/20 bg-accent/5 p-3 flex items-start gap-2.5">
-          <ShieldCheck className="h-5 w-5 shrink-0 text-accent mt-0.5" />
-          <p className="text-sm text-muted-foreground">
+        <div className="mb-4 sm:mb-6 rounded-lg border border-accent/20 bg-accent/5 p-2.5 sm:p-3 flex items-start gap-2">
+          <ShieldCheck className="h-4 w-4 sm:h-5 sm:w-5 shrink-0 text-accent mt-0.5" />
+          <p className="text-xs sm:text-sm text-muted-foreground">
             <span className="font-semibold text-foreground">Solo pedidos reales.</span>{' '}
-            Confirmamos cada pedido por WhatsApp antes del envío para garantizar la mejor experiencia.
+            Confirmamos cada pedido por WhatsApp antes del envío.
           </p>
         </div>
 
         <ScrollReveal>
-          <div className="flex items-center gap-3 mb-1">
-            <Banknote className="h-6 w-6 text-accent" />
-            <h1 className="text-2xl font-bold tracking-tight" style={{ fontFamily: 'Space Grotesk' }}>
+          <div className="flex items-center gap-2 sm:gap-3 mb-1">
+            <Banknote className="h-5 w-5 sm:h-6 sm:w-6 text-accent" />
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight" style={{ fontFamily: 'Space Grotesk' }}>
               Pago Contra Reembolso
             </h1>
           </div>
-          <p className="text-sm text-muted-foreground mb-8">
-            Completa tus datos. Pagarás cuando recibas el pedido en tu domicilio.
+          <p className="text-xs sm:text-sm text-muted-foreground mb-5 sm:mb-8">
+            Completa tus datos. Pagarás cuando recibas el pedido.
           </p>
         </ScrollReveal>
 
         {/* Step indicator */}
-        <div className="mb-8 flex gap-2">
+        <div className="mb-5 sm:mb-8 flex gap-1.5 sm:gap-2">
           {STEPS.map((s, i) => (
             <button
               key={s.id}
               onClick={() => i < step && setStep(i)}
               className={cn(
-                'flex-1 flex items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-medium transition-colors',
+                'flex-1 flex items-center justify-center gap-1.5 rounded-lg py-2 sm:py-2.5 text-xs sm:text-sm font-medium transition-colors',
                 i === step
                   ? 'bg-accent text-accent-foreground'
                   : i < step
@@ -244,29 +266,30 @@ export default function CheckoutCODPage() {
                     : 'bg-muted text-muted-foreground'
               )}
             >
-              <s.icon className="h-4 w-4" />
-              <span className="hidden sm:inline">{s.label}</span>
+              <s.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline sm:inline">{s.label}</span>
+              <span className="xs:hidden sm:hidden">{i + 1}</span>
             </button>
           ))}
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
+        <div className="grid gap-6 sm:gap-8 lg:grid-cols-[1fr_340px]">
           {/* Form area */}
-          <div className="rounded-xl border bg-card p-5 sm:p-6">
+          <div className="rounded-xl border bg-card p-4 sm:p-6">
             {step === 0 && (
-              <div className="space-y-4">
-                <h2 className="font-semibold text-lg mb-4">Datos del cliente</h2>
+              <div className="space-y-3 sm:space-y-4">
+                <h2 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4">Datos del cliente</h2>
                 <FieldGroup label="Nombre completo *" error={errors.customer_name}>
-                  <Input value={form.customer_name} onChange={e => update('customer_name', e.target.value)} placeholder="Tu nombre completo" />
+                  <Input value={form.customer_name} onChange={e => update('customer_name', e.target.value)} placeholder="Tu nombre completo" className="h-11" />
                 </FieldGroup>
                 <FieldGroup label="Teléfono (España) *" error={errors.customer_phone}>
-                  <Input type="tel" value={form.customer_phone} onChange={e => update('customer_phone', e.target.value)} placeholder="612 345 678" />
+                  <Input type="tel" value={form.customer_phone} onChange={e => update('customer_phone', e.target.value)} placeholder="612 345 678" className="h-11" />
                   <p className="text-[11px] text-muted-foreground mt-0.5">
                     Te contactaremos por WhatsApp para confirmar tu pedido.
                   </p>
                 </FieldGroup>
                 <FieldGroup label="Correo electrónico (opcional)" error={errors.customer_email}>
-                  <Input type="email" value={form.customer_email} onChange={e => update('customer_email', e.target.value)} placeholder="tu@email.com" />
+                  <Input type="email" value={form.customer_email} onChange={e => update('customer_email', e.target.value)} placeholder="tu@email.com" className="h-11" />
                 </FieldGroup>
 
                 {/* Preferred contact time */}
@@ -276,7 +299,7 @@ export default function CheckoutCODPage() {
                     Horario preferido de contacto
                   </Label>
                   <Select value={preferredTime} onValueChange={setPreferredTime}>
-                    <SelectTrigger>
+                    <SelectTrigger className="h-11">
                       <SelectValue placeholder="Selecciona un horario" />
                     </SelectTrigger>
                     <SelectContent>
@@ -291,25 +314,25 @@ export default function CheckoutCODPage() {
             )}
 
             {step === 1 && (
-              <div className="space-y-4">
-                <h2 className="font-semibold text-lg mb-4">Dirección de envío</h2>
+              <div className="space-y-3 sm:space-y-4">
+                <h2 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4">Dirección de envío</h2>
                 <FieldGroup label="Dirección *" error={errors.address}>
-                  <Input value={form.address} onChange={e => update('address', e.target.value)} placeholder="Calle, número, piso…" />
+                  <Input value={form.address} onChange={e => update('address', e.target.value)} placeholder="Calle, número, piso…" className="h-11" />
                 </FieldGroup>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:gap-4">
                   <FieldGroup label="Ciudad *" error={errors.city}>
-                    <Input value={form.city} onChange={e => update('city', e.target.value)} placeholder="Madrid" />
+                    <Input value={form.city} onChange={e => update('city', e.target.value)} placeholder="Madrid" className="h-11" />
                   </FieldGroup>
                   <FieldGroup label="Código postal *" error={errors.postal_code}>
-                    <Input value={form.postal_code} onChange={e => update('postal_code', e.target.value)} placeholder="28001" />
+                    <Input value={form.postal_code} onChange={e => update('postal_code', e.target.value)} placeholder="28001" className="h-11" />
                   </FieldGroup>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:gap-4">
                   <FieldGroup label="Provincia *" error={errors.province}>
-                    <Input value={form.province} onChange={e => update('province', e.target.value)} placeholder="Madrid" />
+                    <Input value={form.province} onChange={e => update('province', e.target.value)} placeholder="Madrid" className="h-11" />
                   </FieldGroup>
                   <FieldGroup label="País *" error={errors.country}>
-                    <Input value={form.country} onChange={e => update('country', e.target.value)} placeholder="España" />
+                    <Input value={form.country} onChange={e => update('country', e.target.value)} placeholder="España" className="h-11" />
                   </FieldGroup>
                 </div>
                 <FieldGroup label="Notas (opcional)">
@@ -319,9 +342,9 @@ export default function CheckoutCODPage() {
             )}
 
             {step === 2 && (
-              <div className="space-y-5">
-                <h2 className="font-semibold text-lg">Confirmar pedido</h2>
-                <div className="rounded-lg bg-muted/50 p-4 text-sm space-y-1">
+              <div className="space-y-4 sm:space-y-5">
+                <h2 className="font-semibold text-base sm:text-lg">Confirmar pedido</h2>
+                <div className="rounded-lg bg-muted/50 p-3 sm:p-4 text-sm space-y-1">
                   <p><span className="font-medium">Nombre:</span> {form.customer_name}</p>
                   <p><span className="font-medium">Teléfono:</span> {form.customer_phone}</p>
                   {form.customer_email && <p><span className="font-medium">Email:</span> {form.customer_email}</p>}
@@ -348,18 +371,18 @@ export default function CheckoutCODPage() {
                   ))}
                 </div>
 
-                <div className="rounded-xl border bg-accent/5 p-4 space-y-2">
+                <div className="rounded-xl border bg-accent/5 p-3 sm:p-4 space-y-2">
                   <div className="flex items-center gap-2">
                     <Banknote className="h-5 w-5 text-accent" />
                     <p className="font-semibold text-sm">Pago Contra Reembolso (COD)</p>
                   </div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     No se realizará ningún cobro online. Pagas cuando recibes el producto en tu domicilio.
                   </p>
                 </div>
 
                 {/* COD confirmation checkbox */}
-                <div className="flex items-start gap-3 rounded-lg border p-4">
+                <div className="flex items-start gap-3 rounded-lg border p-3 sm:p-4">
                   <Checkbox
                     id="cod-confirm"
                     checked={codConfirmed}
@@ -368,14 +391,14 @@ export default function CheckoutCODPage() {
                   />
                   <label htmlFor="cod-confirm" className="text-sm cursor-pointer">
                     <span className="font-medium">Entiendo que este pedido se paga al recibir.</span>
-                    <span className="text-muted-foreground block mt-0.5">
+                    <span className="text-muted-foreground block mt-0.5 text-xs sm:text-sm">
                       No se realizará ningún cobro hasta que el repartidor me entregue el paquete.
                     </span>
                   </label>
                 </div>
 
                 {/* Availability confirmation */}
-                <div className="flex items-start gap-3 rounded-lg border p-4">
+                <div className="flex items-start gap-3 rounded-lg border p-3 sm:p-4">
                   <Checkbox
                     id="available-confirm"
                     checked={availableConfirmed}
@@ -384,7 +407,7 @@ export default function CheckoutCODPage() {
                   />
                   <label htmlFor="available-confirm" className="text-sm cursor-pointer">
                     <span className="font-medium">Confirmo que estaré disponible para recibir el pedido.</span>
-                    <span className="text-muted-foreground block mt-0.5">
+                    <span className="text-muted-foreground block mt-0.5 text-xs sm:text-sm">
                       Me comprometo a estar disponible en la dirección indicada durante el horario de reparto.
                     </span>
                   </label>
@@ -392,8 +415,8 @@ export default function CheckoutCODPage() {
               </div>
             )}
 
-            {/* Navigation buttons */}
-            <div className="mt-6 flex gap-3">
+            {/* Navigation buttons - hidden on mobile (sticky bar handles it) */}
+            <div className="mt-6 hidden lg:flex gap-3">
               {step > 0 && (
                 <Button variant="outline" onClick={() => setStep(s => s - 1)}>Atrás</Button>
               )}
@@ -410,10 +433,17 @@ export default function CheckoutCODPage() {
                 </Button>
               )}
             </div>
+
+            {/* Mobile back button */}
+            {step > 0 && (
+              <div className="mt-4 lg:hidden">
+                <Button variant="outline" size="sm" onClick={() => setStep(s => s - 1)}>Atrás</Button>
+              </div>
+            )}
           </div>
 
-          {/* Order summary sidebar */}
-          <div className="rounded-xl border bg-card p-5 h-fit lg:sticky lg:top-24 space-y-4">
+          {/* Order summary sidebar - hidden on mobile (sticky bar shows total) */}
+          <div className="hidden lg:block rounded-xl border bg-card p-5 h-fit lg:sticky lg:top-24 space-y-4">
             <h3 className="font-semibold">Resumen del pedido</h3>
             <div className="space-y-3">
               {items.map(item => (
