@@ -18,6 +18,8 @@ import ProductsPage from "./pages/admin/ProductsPage";
 import ProductFormPage from "./pages/admin/ProductFormPage";
 import CategoriesPage from "./pages/admin/CategoriesPage";
 import ImportPage from "./pages/admin/ImportPage";
+import OrdersPage from "./pages/admin/OrdersPage";
+import CheckoutCODPage from "./pages/CheckoutCODPage";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +41,7 @@ function AppContent() {
         <Route path="/colecciones" element={<CatalogPage />} />
         <Route path="/colecciones/:handle" element={<CatalogPage />} />
         <Route path="/contacto" element={<ContactPage />} />
+        <Route path="/checkout/cod" element={<CheckoutCODPage />} />
         <Route path="/admin/login" element={<LoginPage />} />
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<DashboardPage />} />
@@ -46,6 +49,7 @@ function AppContent() {
           <Route path="products/:id" element={<ProductFormPage />} />
           <Route path="categories" element={<CategoriesPage />} />
           <Route path="import" element={<ImportPage />} />
+          <Route path="orders" element={<OrdersPage />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

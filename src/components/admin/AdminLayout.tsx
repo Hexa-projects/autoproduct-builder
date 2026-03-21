@@ -3,7 +3,7 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import {
-  LayoutDashboard, Package, FolderOpen, LogOut, Menu, X, Upload
+  LayoutDashboard, Package, FolderOpen, LogOut, Menu, X, Upload, ShoppingBag
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -12,6 +12,7 @@ const navItems = [
   { to: '/admin/products', icon: Package, label: 'Productos' },
   { to: '/admin/categories', icon: FolderOpen, label: 'Categorías' },
   { to: '/admin/import', icon: Upload, label: 'Importar' },
+  { to: '/admin/orders', icon: ShoppingBag, label: 'Pedidos COD' },
 ];
 
 export default function AdminLayout() {
