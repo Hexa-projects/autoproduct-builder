@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { CartDrawer } from '@/components/CartDrawer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
-import { Menu, Search } from 'lucide-react';
+import { Menu, Search, UserCircle } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import logo from '@/assets/logo.png';
 
 const navLinks = [
@@ -16,8 +17,15 @@ const navLinks = [
 export function Header() {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [loggedIn, setLoggedIn] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setLoggedIn(!!data.session));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => setLoggedIn(!!s));
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,6 +56,11 @@ export function Header() {
         </form>
 
         <div className="flex items-center gap-1.5 ml-auto sm:gap-2">
+          <Link to={loggedIn ? '/account' : '/account/login'}>
+            <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="Mi cuenta">
+              <UserCircle className="h-5 w-5" />
+            </Button>
+          </Link>
           <CartDrawer />
 
           {/* Mobile menu */}

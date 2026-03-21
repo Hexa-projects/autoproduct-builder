@@ -20,6 +20,11 @@ import CategoriesPage from "./pages/admin/CategoriesPage";
 import ImportPage from "./pages/admin/ImportPage";
 import OrdersPage from "./pages/admin/OrdersPage";
 import CheckoutCODPage from "./pages/CheckoutCODPage";
+import AccountLoginPage from "./pages/account/LoginPage";
+import AccountRegisterPage from "./pages/account/RegisterPage";
+import AccountRecoverPage from "./pages/account/RecoverPage";
+import AccountResetPasswordPage from "./pages/account/ResetPasswordPage";
+import AccountPage from "./pages/account/AccountPage";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +47,11 @@ function AppContent() {
         <Route path="/colecciones/:handle" element={<CatalogPage />} />
         <Route path="/contacto" element={<ContactPage />} />
         <Route path="/checkout/cod" element={<CheckoutCODPage />} />
+        <Route path="/account/login" element={<AccountLoginPage />} />
+        <Route path="/account/register" element={<AccountRegisterPage />} />
+        <Route path="/account/recover" element={<AccountRecoverPage />} />
+        <Route path="/account/reset-password" element={<AccountResetPasswordPage />} />
+        <Route path="/account" element={<AccountPage />} />
         <Route path="/admin/login" element={<LoginPage />} />
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<DashboardPage />} />
