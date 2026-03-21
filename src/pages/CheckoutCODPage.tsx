@@ -204,20 +204,20 @@ export default function CheckoutCODPage() {
   return (
     <Layout>
       {/* Mobile sticky total bar */}
-      <div className="fixed bottom-0 inset-x-0 z-40 bg-card border-t p-3 flex items-center justify-between lg:hidden safe-w">
-        <div>
-          <p className="text-xs text-muted-foreground">Total</p>
-          <p className="text-lg font-bold tabular-nums">€{totalPrice.toFixed(2)}</p>
+      <div className="fixed bottom-0 inset-x-0 z-40 bg-card border-t p-3 flex items-center justify-between lg:hidden" style={{ maxWidth: '100vw' }}>
+        <div className="min-w-0">
+          <p className="text-[10px] text-muted-foreground leading-tight">Total</p>
+          <p className="text-base font-bold tabular-nums">€{totalPrice.toFixed(2)}</p>
         </div>
         {step < 2 ? (
-          <Button onClick={nextStep} className="bg-accent text-accent-foreground hover:bg-accent/90 min-h-[44px] px-6">
+          <Button onClick={nextStep} className="bg-accent text-accent-foreground hover:bg-accent/90 min-h-[42px] px-5 text-sm shrink-0">
             Continuar
           </Button>
         ) : (
           <Button
             onClick={handleSubmit}
             disabled={isSubmitting || !codConfirmed || !availableConfirmed}
-            className="gap-2 bg-accent text-accent-foreground hover:bg-accent/90 min-h-[44px] px-5"
+            className="gap-1.5 bg-accent text-accent-foreground hover:bg-accent/90 min-h-[42px] px-4 text-sm shrink-0"
           >
             {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
             Confirmar pedido
@@ -225,40 +225,40 @@ export default function CheckoutCODPage() {
         )}
       </div>
 
-      <div className="mx-auto max-w-4xl px-4 py-4 sm:py-8 pb-28 lg:pb-8">
-        <Button variant="ghost" size="sm" className="mb-3 gap-1" onClick={() => navigate(-1)}>
+      <div className="mx-auto max-w-4xl px-3 sm:px-4 py-3 sm:py-8 pb-24 lg:pb-8 overflow-x-hidden">
+        <Button variant="ghost" size="sm" className="mb-2 gap-1 -ml-1" onClick={() => navigate(-1)}>
           <ArrowLeft className="h-4 w-4" /> Volver
         </Button>
 
         {/* Anti-fraud notice */}
-        <div className="mb-4 sm:mb-6 rounded-lg border border-accent/20 bg-accent/5 p-2.5 sm:p-3 flex items-start gap-2">
-          <ShieldCheck className="h-4 w-4 sm:h-5 sm:w-5 shrink-0 text-accent mt-0.5" />
-          <p className="text-xs sm:text-sm text-muted-foreground">
+        <div className="mb-3 sm:mb-6 rounded-lg border border-accent/20 bg-accent/5 p-2 sm:p-3 flex items-start gap-2">
+          <ShieldCheck className="h-4 w-4 shrink-0 text-accent mt-0.5" />
+          <p className="text-[11px] sm:text-sm text-muted-foreground leading-snug">
             <span className="font-semibold text-foreground">Solo pedidos reales.</span>{' '}
-            Confirmamos cada pedido por WhatsApp antes del envío.
+            Confirmamos por WhatsApp antes del envío.
           </p>
         </div>
 
         <ScrollReveal>
-          <div className="flex items-center gap-2 sm:gap-3 mb-1">
-            <Banknote className="h-5 w-5 sm:h-6 sm:w-6 text-accent" />
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight" style={{ fontFamily: 'Space Grotesk' }}>
+          <div className="flex items-center gap-2 mb-0.5">
+            <Banknote className="h-5 w-5 text-accent shrink-0" />
+            <h1 className="text-lg sm:text-2xl font-bold tracking-tight" style={{ fontFamily: 'Space Grotesk' }}>
               Pago Contra Reembolso
             </h1>
           </div>
-          <p className="text-xs sm:text-sm text-muted-foreground mb-5 sm:mb-8">
+          <p className="text-[11px] sm:text-sm text-muted-foreground mb-4 sm:mb-8">
             Completa tus datos. Pagarás cuando recibas el pedido.
           </p>
         </ScrollReveal>
 
         {/* Step indicator */}
-        <div className="mb-5 sm:mb-8 flex gap-1.5 sm:gap-2">
+        <div className="mb-4 sm:mb-8 grid grid-cols-3 gap-1.5 sm:gap-2">
           {STEPS.map((s, i) => (
             <button
               key={s.id}
               onClick={() => i < step && setStep(i)}
               className={cn(
-                'flex-1 flex items-center justify-center gap-1.5 rounded-lg py-2 sm:py-2.5 text-xs sm:text-sm font-medium transition-colors',
+                'flex items-center justify-center gap-1 rounded-lg py-2 text-[11px] sm:text-sm font-medium transition-colors',
                 i === step
                   ? 'bg-accent text-accent-foreground'
                   : i < step
@@ -266,41 +266,40 @@ export default function CheckoutCODPage() {
                     : 'bg-muted text-muted-foreground'
               )}
             >
-              <s.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              <span className="hidden xs:inline sm:inline">{s.label}</span>
-              <span className="xs:hidden sm:hidden">{i + 1}</span>
+              <s.icon className="h-3.5 w-3.5 shrink-0" />
+              <span className="truncate">{s.label}</span>
             </button>
           ))}
         </div>
 
-        <div className="grid gap-6 sm:gap-8 lg:grid-cols-[1fr_340px]">
+        <div className="grid gap-5 sm:gap-8 lg:grid-cols-[1fr_340px]">
           {/* Form area */}
-          <div className="rounded-xl border bg-card p-4 sm:p-6">
+          <div className="rounded-xl border bg-card p-3 sm:p-6 overflow-hidden">
             {step === 0 && (
-              <div className="space-y-3 sm:space-y-4">
-                <h2 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4">Datos del cliente</h2>
+              <div className="space-y-3">
+                <h2 className="font-semibold text-sm sm:text-lg mb-2 sm:mb-4">Datos del cliente</h2>
                 <FieldGroup label="Nombre completo *" error={errors.customer_name}>
-                  <Input value={form.customer_name} onChange={e => update('customer_name', e.target.value)} placeholder="Tu nombre completo" className="h-11" />
+                  <Input value={form.customer_name} onChange={e => update('customer_name', e.target.value)} placeholder="Tu nombre completo" className="h-10 sm:h-11 text-sm" />
                 </FieldGroup>
                 <FieldGroup label="Teléfono (España) *" error={errors.customer_phone}>
-                  <Input type="tel" value={form.customer_phone} onChange={e => update('customer_phone', e.target.value)} placeholder="612 345 678" className="h-11" />
-                  <p className="text-[11px] text-muted-foreground mt-0.5">
-                    Te contactaremos por WhatsApp para confirmar tu pedido.
+                  <Input type="tel" value={form.customer_phone} onChange={e => update('customer_phone', e.target.value)} placeholder="612 345 678" className="h-10 sm:h-11 text-sm" />
+                  <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5">
+                    Te contactaremos por WhatsApp para confirmar.
                   </p>
                 </FieldGroup>
-                <FieldGroup label="Correo electrónico (opcional)" error={errors.customer_email}>
-                  <Input type="email" value={form.customer_email} onChange={e => update('customer_email', e.target.value)} placeholder="tu@email.com" className="h-11" />
+                <FieldGroup label="Email (opcional)" error={errors.customer_email}>
+                  <Input type="email" value={form.customer_email} onChange={e => update('customer_email', e.target.value)} placeholder="tu@email.com" className="h-10 sm:h-11 text-sm" />
                 </FieldGroup>
 
                 {/* Preferred contact time */}
-                <div className="space-y-1.5">
-                  <Label className="text-sm flex items-center gap-1.5">
-                    <Clock className="h-3.5 w-3.5" />
-                    Horario preferido de contacto
+                <div className="space-y-1">
+                  <Label className="text-xs sm:text-sm flex items-center gap-1.5">
+                    <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                    Horario de contacto
                   </Label>
                   <Select value={preferredTime} onValueChange={setPreferredTime}>
-                    <SelectTrigger className="h-11">
-                      <SelectValue placeholder="Selecciona un horario" />
+                    <SelectTrigger className="h-10 sm:h-11 text-sm">
+                      <SelectValue placeholder="Selecciona horario" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="mañana (9:00–13:00)">Mañana (9:00–13:00)</SelectItem>
@@ -314,100 +313,100 @@ export default function CheckoutCODPage() {
             )}
 
             {step === 1 && (
-              <div className="space-y-3 sm:space-y-4">
-                <h2 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4">Dirección de envío</h2>
+              <div className="space-y-3">
+                <h2 className="font-semibold text-sm sm:text-lg mb-2 sm:mb-4">Dirección de envío</h2>
                 <FieldGroup label="Dirección *" error={errors.address}>
-                  <Input value={form.address} onChange={e => update('address', e.target.value)} placeholder="Calle, número, piso…" className="h-11" />
+                  <Input value={form.address} onChange={e => update('address', e.target.value)} placeholder="Calle, número, piso…" className="h-10 sm:h-11 text-sm" />
                 </FieldGroup>
-                <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:gap-4">
+                <div className="grid grid-cols-2 gap-2 sm:gap-4">
                   <FieldGroup label="Ciudad *" error={errors.city}>
-                    <Input value={form.city} onChange={e => update('city', e.target.value)} placeholder="Madrid" className="h-11" />
+                    <Input value={form.city} onChange={e => update('city', e.target.value)} placeholder="Madrid" className="h-10 sm:h-11 text-sm" />
                   </FieldGroup>
-                  <FieldGroup label="Código postal *" error={errors.postal_code}>
-                    <Input value={form.postal_code} onChange={e => update('postal_code', e.target.value)} placeholder="28001" className="h-11" />
+                  <FieldGroup label="C. Postal *" error={errors.postal_code}>
+                    <Input value={form.postal_code} onChange={e => update('postal_code', e.target.value)} placeholder="28001" className="h-10 sm:h-11 text-sm" />
                   </FieldGroup>
                 </div>
-                <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:gap-4">
+                <div className="grid grid-cols-2 gap-2 sm:gap-4">
                   <FieldGroup label="Provincia *" error={errors.province}>
-                    <Input value={form.province} onChange={e => update('province', e.target.value)} placeholder="Madrid" className="h-11" />
+                    <Input value={form.province} onChange={e => update('province', e.target.value)} placeholder="Madrid" className="h-10 sm:h-11 text-sm" />
                   </FieldGroup>
                   <FieldGroup label="País *" error={errors.country}>
-                    <Input value={form.country} onChange={e => update('country', e.target.value)} placeholder="España" className="h-11" />
+                    <Input value={form.country} onChange={e => update('country', e.target.value)} placeholder="España" className="h-10 sm:h-11 text-sm" />
                   </FieldGroup>
                 </div>
                 <FieldGroup label="Notas (opcional)">
-                  <Textarea value={form.notes} onChange={e => update('notes', e.target.value)} placeholder="Instrucciones de entrega…" rows={2} />
+                  <Textarea value={form.notes} onChange={e => update('notes', e.target.value)} placeholder="Instrucciones de entrega…" rows={2} className="text-sm" />
                 </FieldGroup>
               </div>
             )}
 
             {step === 2 && (
-              <div className="space-y-4 sm:space-y-5">
-                <h2 className="font-semibold text-base sm:text-lg">Confirmar pedido</h2>
-                <div className="rounded-lg bg-muted/50 p-3 sm:p-4 text-sm space-y-1">
+              <div className="space-y-3 sm:space-y-5">
+                <h2 className="font-semibold text-sm sm:text-lg">Confirmar pedido</h2>
+                <div className="rounded-lg bg-muted/50 p-2.5 sm:p-4 text-xs sm:text-sm space-y-0.5 overflow-hidden break-words">
                   <p><span className="font-medium">Nombre:</span> {form.customer_name}</p>
                   <p><span className="font-medium">Teléfono:</span> {form.customer_phone}</p>
-                  {form.customer_email && <p><span className="font-medium">Email:</span> {form.customer_email}</p>}
+                  {form.customer_email && <p className="truncate"><span className="font-medium">Email:</span> {form.customer_email}</p>}
                   {preferredTime && <p><span className="font-medium">Contacto:</span> {preferredTime}</p>}
-                  <p><span className="font-medium">Dirección:</span> {form.address}, {form.city} {form.postal_code}</p>
+                  <p className="break-words"><span className="font-medium">Dirección:</span> {form.address}, {form.city} {form.postal_code}</p>
                   <p><span className="font-medium">Provincia:</span> {form.province}, {form.country}</p>
-                  {form.notes && <p><span className="font-medium">Notas:</span> {form.notes}</p>}
+                  {form.notes && <p className="break-words"><span className="font-medium">Notas:</span> {form.notes}</p>}
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {items.map(item => (
-                    <div key={item.variantId} className="flex gap-3 items-center">
-                      <div className="h-12 w-12 rounded-md bg-muted overflow-hidden flex-shrink-0">
+                    <div key={item.variantId} className="flex gap-2 sm:gap-3 items-center">
+                      <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-md bg-muted overflow-hidden shrink-0">
                         {item.product.node.images?.edges?.[0]?.node && (
                           <img src={item.product.node.images.edges[0].node.url} alt="" className="h-full w-full object-cover" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate">{item.product.node.title}</p>
-                        <p className="text-xs text-muted-foreground">{item.selectedOptions.map(o => o.value).join(' · ')} × {item.quantity}</p>
+                        <p className="font-medium text-xs sm:text-sm truncate">{item.product.node.title}</p>
+                        <p className="text-[10px] sm:text-xs text-muted-foreground">{item.selectedOptions.map(o => o.value).join(' · ')} × {item.quantity}</p>
                       </div>
-                      <p className="font-semibold text-sm tabular-nums">€{(parseFloat(item.price.amount) * item.quantity).toFixed(2)}</p>
+                      <p className="font-semibold text-xs sm:text-sm tabular-nums shrink-0">€{(parseFloat(item.price.amount) * item.quantity).toFixed(2)}</p>
                     </div>
                   ))}
                 </div>
 
-                <div className="rounded-xl border bg-accent/5 p-3 sm:p-4 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Banknote className="h-5 w-5 text-accent" />
-                    <p className="font-semibold text-sm">Pago Contra Reembolso (COD)</p>
+                <div className="rounded-lg border bg-accent/5 p-2.5 sm:p-4 space-y-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <Banknote className="h-4 w-4 text-accent shrink-0" />
+                    <p className="font-semibold text-xs sm:text-sm">Pago Contra Reembolso (COD)</p>
                   </div>
-                  <p className="text-xs sm:text-sm text-muted-foreground">
+                  <p className="text-[11px] sm:text-sm text-muted-foreground leading-snug">
                     No se realizará ningún cobro online. Pagas cuando recibes el producto en tu domicilio.
                   </p>
                 </div>
 
                 {/* COD confirmation checkbox */}
-                <div className="flex items-start gap-3 rounded-lg border p-3 sm:p-4">
+                <div className="flex items-start gap-2.5 rounded-lg border p-2.5 sm:p-4">
                   <Checkbox
                     id="cod-confirm"
                     checked={codConfirmed}
                     onCheckedChange={(checked) => setCodConfirmed(checked === true)}
-                    className="mt-0.5"
+                    className="mt-0.5 shrink-0"
                   />
-                  <label htmlFor="cod-confirm" className="text-sm cursor-pointer">
-                    <span className="font-medium">Entiendo que este pedido se paga al recibir.</span>
-                    <span className="text-muted-foreground block mt-0.5 text-xs sm:text-sm">
+                  <label htmlFor="cod-confirm" className="text-xs sm:text-sm cursor-pointer min-w-0">
+                    <span className="font-medium leading-snug">Entiendo que este pedido se paga al recibir.</span>
+                    <span className="text-muted-foreground block mt-0.5 text-[11px] sm:text-sm leading-snug">
                       No se realizará ningún cobro hasta que el repartidor me entregue el paquete.
                     </span>
                   </label>
                 </div>
 
                 {/* Availability confirmation */}
-                <div className="flex items-start gap-3 rounded-lg border p-3 sm:p-4">
+                <div className="flex items-start gap-2.5 rounded-lg border p-2.5 sm:p-4">
                   <Checkbox
                     id="available-confirm"
                     checked={availableConfirmed}
                     onCheckedChange={(checked) => setAvailableConfirmed(checked === true)}
-                    className="mt-0.5"
+                    className="mt-0.5 shrink-0"
                   />
-                  <label htmlFor="available-confirm" className="text-sm cursor-pointer">
-                    <span className="font-medium">Confirmo que estaré disponible para recibir el pedido.</span>
-                    <span className="text-muted-foreground block mt-0.5 text-xs sm:text-sm">
+                  <label htmlFor="available-confirm" className="text-xs sm:text-sm cursor-pointer min-w-0">
+                    <span className="font-medium leading-snug">Confirmo que estaré disponible para recibir el pedido.</span>
+                    <span className="text-muted-foreground block mt-0.5 text-[11px] sm:text-sm leading-snug">
                       Me comprometo a estar disponible en la dirección indicada durante el horario de reparto.
                     </span>
                   </label>
@@ -436,7 +435,7 @@ export default function CheckoutCODPage() {
 
             {/* Mobile back button */}
             {step > 0 && (
-              <div className="mt-4 lg:hidden">
+              <div className="mt-3 lg:hidden">
                 <Button variant="outline" size="sm" onClick={() => setStep(s => s - 1)}>Atrás</Button>
               </div>
             )}
