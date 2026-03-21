@@ -124,3 +124,9 @@ export function trackSelectKit(kit: '1x' | '2x' | '3x', product: { id: string; t
     currency: product.currency,
   });
 }
+
+// ─── Auth events ────────────────────────────────────────────────────
+
+export function trackAuthEvent(event: string) {
+  fbqCustom(event);
+}

@@ -10,6 +10,7 @@ const footerLinks = {
     { label: 'Todos los productos', to: '/colecciones' },
   ],
   Ayuda: [
+    { label: 'Mi cuenta', to: '/account' },
     { label: 'Contacto', to: '/contacto' },
     { label: 'Envíos y entregas', to: '/envios' },
     { label: 'Devoluciones', to: '/devoluciones' },
