@@ -116,10 +116,10 @@ export default function Index() {
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
         <div className="absolute inset-0 flex flex-col items-center justify-end gap-3 pb-8 sm:pb-12 px-4 text-center">
           <h1 className="text-white text-xl sm:text-3xl font-bold tracking-tight drop-shadow-lg max-w-2xl" style={{ fontFamily: 'Space Grotesk', lineHeight: '1.15' }}>
-            Tu bienestar, sin riesgo: compra hoy y paga cuando lo recibas
+            Compra hoy y paga al recibir
           </h1>
           <p className="text-white/80 text-xs sm:text-sm max-w-md drop-shadow-sm">
-            Sin tarjeta, sin pago anticipado. Pedido rápido y confirmación inmediata.
+            Sin tarjeta, sin pago anticipado. Confirmamos tu pedido y pagas en casa.
           </p>
           <div className="flex flex-col sm:flex-row items-center gap-3 mt-1">
             <Button
@@ -129,7 +129,7 @@ export default function Index() {
             >
               <Link to="/colecciones">
                 <Banknote className="h-4 w-4" />
-                Comprar con Pago Contra Reembolso
+                Pedir ahora con Contra Reembolso
               </Link>
             </Button>
             <Button
@@ -198,7 +198,7 @@ export default function Index() {
                   Los favoritos
                 </div>
                 <h2 className="text-2xl font-bold tracking-tight sm:text-3xl" style={{ lineHeight: '1.1' }}>
-                  Más vendidos para Pago Contra Reembolso
+                  Más vendidos con Pago al Recibir
                 </h2>
                 <p className="mt-2 text-sm text-muted-foreground">
                   Los productos más pedidos por nuestros clientes con pago al recibir.
@@ -216,7 +216,7 @@ export default function Index() {
         </section>
       )}
 
-      {/* Best sellers */}
+      {/* All products */}
       <section className="mx-auto max-w-7xl px-4 py-10 sm:py-14">
         <ScrollReveal>
           <div className="flex items-end justify-between">
@@ -338,6 +338,21 @@ export default function Index() {
           <CODFaq />
         </div>
       </section>
+
+      {/* Sticky mobile CTA */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card/95 p-3 backdrop-blur-md lg:hidden">
+        <Button
+          size="lg"
+          asChild
+          className="w-full min-h-[48px] text-base font-semibold gap-2 bg-accent text-accent-foreground hover:bg-accent/90 active:scale-[0.97]"
+        >
+          <Link to="/colecciones">
+            <Banknote className="h-4 w-4" />
+            Pedir con Contra Reembolso
+          </Link>
+        </Button>
+      </div>
+      <div className="h-16 lg:hidden" />
     </Layout>
   );
 }
