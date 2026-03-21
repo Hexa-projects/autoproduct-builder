@@ -7,10 +7,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCartStore } from '@/stores/cartStore';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Loader2, CheckCircle, Package, Truck, User, ArrowLeft, Banknote, ShieldCheck, Phone } from 'lucide-react';
+import { Loader2, CheckCircle, Package, Truck, User, ArrowLeft, Banknote, ShieldCheck, Phone, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { z } from 'zod';
 
@@ -43,6 +44,8 @@ export default function CheckoutCODPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [codConfirmed, setCodConfirmed] = useState(false);
+  const [availableConfirmed, setAvailableConfirmed] = useState(false);
+  const [preferredTime, setPreferredTime] = useState('');
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
 
   const [form, setForm] = useState<FormData>({
@@ -94,6 +97,10 @@ export default function CheckoutCODPage() {
       toast.error('Confirma que entiendes el pago contra reembolso');
       return;
     }
+    if (!availableConfirmed) {
+      toast.error('Confirma que estarás disponible para recibir el pedido');
+      return;
+    }
     setIsSubmitting(true);
     try {
       const orderItems = items.map(i => ({
@@ -106,6 +113,11 @@ export default function CheckoutCODPage() {
         options: i.selectedOptions,
         image: i.product.node.images?.edges?.[0]?.node?.url || null,
       }));
+
+      const notesWithTime = [
+        form.notes?.trim(),
+        preferredTime ? `Horario preferido de contacto: ${preferredTime}` : null,
+      ].filter(Boolean).join(' | ');
 
       const { error } = await supabase.from('cod_orders').insert({
         customer_name: form.customer_name.trim(),
@@ -121,7 +133,7 @@ export default function CheckoutCODPage() {
         shipping_cost: 0,
         total: totalPrice,
         shipping_method: 'COD',
-        notes: form.notes?.trim() || null,
+        notes: notesWithTime || null,
       });
 
       if (error) throw error;
@@ -191,10 +203,19 @@ export default function CheckoutCODPage() {
 
   return (
     <Layout>
-      <div className="mx-auto max-w-4xl px-4 py-8">
+      <div className="mx-auto max-w-4xl px-4 py-6 sm:py-8">
         <Button variant="ghost" size="sm" className="mb-4 gap-1" onClick={() => navigate(-1)}>
           <ArrowLeft className="h-4 w-4" /> Volver
         </Button>
+
+        {/* Anti-fraud notice */}
+        <div className="mb-6 rounded-lg border border-accent/20 bg-accent/5 p-3 flex items-start gap-2.5">
+          <ShieldCheck className="h-5 w-5 shrink-0 text-accent mt-0.5" />
+          <p className="text-sm text-muted-foreground">
+            <span className="font-semibold text-foreground">Solo pedidos reales.</span>{' '}
+            Confirmamos cada pedido por WhatsApp antes del envío para garantizar la mejor experiencia.
+          </p>
+        </div>
 
         <ScrollReveal>
           <div className="flex items-center gap-3 mb-1">
@@ -231,7 +252,7 @@ export default function CheckoutCODPage() {
 
         <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
           {/* Form area */}
-          <div className="rounded-xl border bg-card p-6">
+          <div className="rounded-xl border bg-card p-5 sm:p-6">
             {step === 0 && (
               <div className="space-y-4">
                 <h2 className="font-semibold text-lg mb-4">Datos del cliente</h2>
@@ -247,6 +268,25 @@ export default function CheckoutCODPage() {
                 <FieldGroup label="Correo electrónico (opcional)" error={errors.customer_email}>
                   <Input type="email" value={form.customer_email} onChange={e => update('customer_email', e.target.value)} placeholder="tu@email.com" />
                 </FieldGroup>
+
+                {/* Preferred contact time */}
+                <div className="space-y-1.5">
+                  <Label className="text-sm flex items-center gap-1.5">
+                    <Clock className="h-3.5 w-3.5" />
+                    Horario preferido de contacto
+                  </Label>
+                  <Select value={preferredTime} onValueChange={setPreferredTime}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona un horario" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="mañana (9:00–13:00)">Mañana (9:00–13:00)</SelectItem>
+                      <SelectItem value="tarde (13:00–18:00)">Tarde (13:00–18:00)</SelectItem>
+                      <SelectItem value="noche (18:00–21:00)">Noche (18:00–21:00)</SelectItem>
+                      <SelectItem value="cualquier hora">Cualquier hora</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             )}
 
@@ -273,18 +313,19 @@ export default function CheckoutCODPage() {
                   </FieldGroup>
                 </div>
                 <FieldGroup label="Notas (opcional)">
-                  <Textarea value={form.notes} onChange={e => update('notes', e.target.value)} placeholder="Instrucciones de entrega…" rows={3} />
+                  <Textarea value={form.notes} onChange={e => update('notes', e.target.value)} placeholder="Instrucciones de entrega…" rows={2} />
                 </FieldGroup>
               </div>
             )}
 
             {step === 2 && (
-              <div className="space-y-6">
+              <div className="space-y-5">
                 <h2 className="font-semibold text-lg">Confirmar pedido</h2>
                 <div className="rounded-lg bg-muted/50 p-4 text-sm space-y-1">
                   <p><span className="font-medium">Nombre:</span> {form.customer_name}</p>
                   <p><span className="font-medium">Teléfono:</span> {form.customer_phone}</p>
                   {form.customer_email && <p><span className="font-medium">Email:</span> {form.customer_email}</p>}
+                  {preferredTime && <p><span className="font-medium">Contacto:</span> {preferredTime}</p>}
                   <p><span className="font-medium">Dirección:</span> {form.address}, {form.city} {form.postal_code}</p>
                   <p><span className="font-medium">Provincia:</span> {form.province}, {form.country}</p>
                   {form.notes && <p><span className="font-medium">Notas:</span> {form.notes}</p>}
@@ -307,10 +348,10 @@ export default function CheckoutCODPage() {
                   ))}
                 </div>
 
-                <div className="rounded-xl border bg-accent/5 p-4 space-y-3">
+                <div className="rounded-xl border bg-accent/5 p-4 space-y-2">
                   <div className="flex items-center gap-2">
                     <Banknote className="h-5 w-5 text-accent" />
-                    <p className="font-semibold">💰 Pago Contra Reembolso (COD)</p>
+                    <p className="font-semibold text-sm">Pago Contra Reembolso (COD)</p>
                   </div>
                   <p className="text-sm text-muted-foreground">
                     No se realizará ningún cobro online. Pagas cuando recibes el producto en tu domicilio.
@@ -332,6 +373,22 @@ export default function CheckoutCODPage() {
                     </span>
                   </label>
                 </div>
+
+                {/* Availability confirmation */}
+                <div className="flex items-start gap-3 rounded-lg border p-4">
+                  <Checkbox
+                    id="available-confirm"
+                    checked={availableConfirmed}
+                    onCheckedChange={(checked) => setAvailableConfirmed(checked === true)}
+                    className="mt-0.5"
+                  />
+                  <label htmlFor="available-confirm" className="text-sm cursor-pointer">
+                    <span className="font-medium">Confirmo que estaré disponible para recibir el pedido.</span>
+                    <span className="text-muted-foreground block mt-0.5">
+                      Me comprometo a estar disponible en la dirección indicada durante el horario de reparto.
+                    </span>
+                  </label>
+                </div>
               </div>
             )}
 
@@ -341,12 +398,12 @@ export default function CheckoutCODPage() {
                 <Button variant="outline" onClick={() => setStep(s => s - 1)}>Atrás</Button>
               )}
               {step < 2 ? (
-                <Button onClick={nextStep} className="ml-auto">Continuar</Button>
+                <Button onClick={nextStep} className="ml-auto bg-accent text-accent-foreground hover:bg-accent/90">Continuar</Button>
               ) : (
                 <Button
                   onClick={handleSubmit}
-                  disabled={isSubmitting || !codConfirmed}
-                  className="ml-auto gap-2 bg-accent text-accent-foreground hover:bg-accent/90"
+                  disabled={isSubmitting || !codConfirmed || !availableConfirmed}
+                  className="ml-auto gap-2 bg-accent text-accent-foreground hover:bg-accent/90 min-h-[48px]"
                 >
                   {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
                   Confirmar pedido
