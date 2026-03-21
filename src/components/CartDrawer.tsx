@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { ShoppingCart, Minus, Plus, Trash2, ExternalLink, Loader2 } from "lucide-react";
+import { ShoppingCart, Minus, Plus, Trash2, ExternalLink, Loader2, Banknote } from "lucide-react";
 import { useCartStore } from "@/stores/cartStore";
 import { trackInitiateCheckout } from "@/lib/tracking";
 
 export function CartDrawer() {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
   const { items, isLoading, isSyncing, updateQuantity, removeItem, getCheckoutUrl, syncCart } = useCartStore();
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = items.reduce((sum, item) => sum + (parseFloat(item.price.amount) * item.quantity), 0);
@@ -94,8 +96,17 @@ export function CartDrawer() {
                   {isLoading || isSyncing ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
-                    <><ExternalLink className="w-4 h-4 mr-2" />Finalizar compra</>
+                    <><ExternalLink className="w-4 h-4 mr-2" />Pagar online</>
                   )}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full gap-2"
+                  size="lg"
+                  onClick={() => { setIsOpen(false); navigate('/checkout/cod'); }}
+                  disabled={items.length === 0}
+                >
+                  <Banknote className="w-4 h-4" /> Pago contra entrega
                 </Button>
               </div>
             </>

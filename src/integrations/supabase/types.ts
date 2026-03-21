@@ -47,6 +47,72 @@ export type Database = {
         }
         Relationships: []
       }
+      cod_orders: {
+        Row: {
+          address: string
+          city: string
+          country: string
+          created_at: string
+          customer_email: string | null
+          customer_name: string
+          customer_phone: string
+          id: string
+          items: Json
+          notes: string | null
+          order_number: number
+          postal_code: string
+          province: string
+          shipping_cost: number
+          shipping_method: string | null
+          status: string
+          subtotal: number
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          city: string
+          country?: string
+          created_at?: string
+          customer_email?: string | null
+          customer_name: string
+          customer_phone: string
+          id?: string
+          items?: Json
+          notes?: string | null
+          order_number?: number
+          postal_code: string
+          province: string
+          shipping_cost?: number
+          shipping_method?: string | null
+          status?: string
+          subtotal?: number
+          total?: number
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          city?: string
+          country?: string
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string
+          customer_phone?: string
+          id?: string
+          items?: Json
+          notes?: string | null
+          order_number?: number
+          postal_code?: string
+          province?: string
+          shipping_cost?: number
+          shipping_method?: string | null
+          status?: string
+          subtotal?: number
+          total?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       product_variations: {
         Row: {
           checkout_url: string | null
