@@ -97,57 +97,49 @@ export default function Index() {
 
   return (
     <Layout>
-      {/* Hero */}
+      {/* Hero — horizontal layout */}
       <section className="relative overflow-hidden bg-foreground">
-        {/* Desktop banner */}
-        <div className="hidden md:block">
-          <img
-            src={bannerDesktop}
-            alt="Revolución Fit — Compra y paga al recibir"
-            className="w-full object-cover"
-            style={{ maxHeight: '520px' }}
-          />
-        </div>
-        {/* Mobile banner — constrained height */}
-        <div className="md:hidden">
-          <img
-            src={bannerMobile}
-            alt="Revolución Fit — Pago contra reembolso"
-            className="w-full h-[420px] object-cover"
-          />
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
-        <div className="absolute inset-0 flex flex-col items-center justify-end gap-2 pb-6 px-4 text-center sm:gap-3 sm:pb-12">
-          <h1
-            className="text-white text-lg font-bold tracking-tight drop-shadow-lg max-w-2xl sm:text-3xl"
-            style={{ fontFamily: 'Space Grotesk', lineHeight: '1.15' }}
-          >
-            Compra hoy y paga al recibir
-          </h1>
-          <p className="text-white/80 text-xs max-w-xs drop-shadow-sm sm:text-sm sm:max-w-md">
-            Sin tarjeta, sin pago anticipado. Confirmamos tu pedido y pagas en casa.
-          </p>
-          <div className="flex flex-col w-full max-w-xs gap-2 mt-1 sm:flex-row sm:max-w-none sm:w-auto sm:items-center sm:gap-3">
-            <Button
-              size="lg"
-              asChild
-              className="shadow-lg text-sm font-semibold active:scale-[0.97] bg-accent text-accent-foreground hover:bg-accent/90 min-h-[48px] gap-2 w-full sm:w-auto sm:text-base"
-            >
-              <Link to="/colecciones">
-                <Banknote className="h-4 w-4 shrink-0" />
-                Pedir con Contra Reembolso
-              </Link>
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              asChild
-              className="shadow-lg text-sm font-semibold active:scale-[0.97] border-white/50 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20 hover:text-white w-full sm:w-auto sm:text-base"
-            >
-              <Link to="/colecciones">
-                Ver más vendidos <ArrowRight className="h-4 w-4 ml-1 shrink-0" />
-              </Link>
-            </Button>
+        <img
+          src={bannerDesktop}
+          alt="Revolución Fit — Compra y paga al recibir"
+          className="w-full object-cover h-[220px] sm:h-[320px] md:h-[420px] lg:h-[480px]"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent sm:bg-gradient-to-r sm:from-black/75 sm:via-black/40 sm:to-transparent" />
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full px-4 sm:px-8 lg:px-12 max-w-7xl mx-auto">
+            <div className="max-w-sm sm:max-w-md">
+              <h1
+                className="text-white text-base font-bold tracking-tight drop-shadow-lg sm:text-2xl md:text-3xl lg:text-4xl"
+                style={{ fontFamily: 'Space Grotesk', lineHeight: '1.15' }}
+              >
+                Compra hoy y paga al recibir
+              </h1>
+              <p className="text-white/80 text-[11px] mt-1 drop-shadow-sm sm:text-sm sm:mt-2 max-w-xs sm:max-w-sm">
+                Sin tarjeta, sin pago anticipado. Confirmamos tu pedido y pagas en casa.
+              </p>
+              <div className="flex flex-col gap-2 mt-3 sm:flex-row sm:items-center sm:gap-3 sm:mt-4">
+                <Button
+                  size="lg"
+                  asChild
+                  className="shadow-lg text-xs font-semibold active:scale-[0.97] bg-accent text-accent-foreground hover:bg-accent/90 min-h-[42px] gap-2 w-full sm:w-auto sm:text-sm sm:min-h-[48px]"
+                >
+                  <Link to="/colecciones">
+                    <Banknote className="h-4 w-4 shrink-0" />
+                    Pedir con Contra Reembolso
+                  </Link>
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  asChild
+                  className="shadow-lg text-xs font-semibold active:scale-[0.97] border-white/50 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20 hover:text-white w-full sm:w-auto sm:text-sm"
+                >
+                  <Link to="/colecciones">
+                    Ver más vendidos <ArrowRight className="h-4 w-4 ml-1 shrink-0" />
+                  </Link>
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </section>
