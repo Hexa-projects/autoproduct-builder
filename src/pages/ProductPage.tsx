@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useShopifyProductByHandle, useShopifyProducts } from '@/hooks/useShopify';
 import { useCartStore } from '@/stores/cartStore';
 import { Layout } from '@/components/layout/Layout';
 import { ProductCard } from '@/components/ProductCard';
 import { ScrollReveal } from '@/components/ScrollReveal';
+import { CODFaq } from '@/components/CODFaq';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -12,38 +13,44 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import {
   Truck, ShieldCheck, RotateCcw, ShoppingBag, Loader2, Check,
-  Package, CreditCard, ChevronLeft, ChevronRight, ShoppingCart, MapPin,
+  Package, Banknote, ChevronLeft, ChevronRight, Phone, MapPin,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { trackViewContent, trackAddToCart } from '@/lib/tracking';
 
 const generalFAQ = [
-  { q: '¿Cuánto tarda el envío?', a: 'Los pedidos se procesan en 24h y el envío estándar tarda 2-5 días laborables en España y Portugal.' },
-  { q: '¿Puedo devolver el producto?', a: 'Sí, dispones de 30 días desde la recepción para solicitar una devolución sin preguntas. La recogida es gratuita.' },
-  { q: '¿Qué métodos de pago aceptáis?', a: 'Aceptamos tarjeta de crédito/débito (Visa, Mastercard), Google Pay, PayPal y pago a plazos.' },
-  { q: '¿Cómo elijo la talla correcta?', a: 'Consulta la tabla de medidas en cada ficha de producto. Si estás entre dos tallas, recomendamos la más grande.' },
+  { q: '¿Cuánto tarda el envío?', a: 'Los pedidos se procesan en 24h y el envío estándar tarda 2-5 días laborables en España peninsular.' },
+  { q: '¿Puedo devolver el producto?', a: 'Sí, dispones de 30 días desde la recepción para solicitar una devolución sin preguntas.' },
+  { q: '¿El contra reembolso tiene coste extra?', a: 'No. El precio que ves es el precio final. Sin recargos.' },
+  { q: '¿Cómo se confirma mi pedido?', a: 'Te contactamos por teléfono o WhatsApp para confirmar tu dirección y los detalles del envío.' },
 ];
 
 const trustBlocks = [
   {
-    icon: Package,
-    title: 'Devoluciones gratuitas',
-    desc: 'Compra sin riesgo. Si no estás satisfecho, lo recogemos gratis.',
+    icon: Banknote,
+    title: 'Pago Contra Reembolso',
+    desc: 'Pagas solo cuando recibes el producto en tu puerta. Sin riesgo.',
   },
   {
     icon: RotateCcw,
     title: '30 días de devolución',
-    desc: 'Prueba nuestro equipamiento y devuélvelo en 30 días sin dar explicación.',
+    desc: 'Si no estás satisfecho, devuélvelo en 30 días sin dar explicación.',
   },
   {
-    icon: CreditCard,
-    title: 'Pago a plazos',
-    desc: 'Paga con flexibilidad: rápido, fácil y transparente.',
+    icon: Truck,
+    title: 'Envío rápido España',
+    desc: 'Entrega en 2–5 días laborables en península.',
+  },
+  {
+    icon: Phone,
+    title: 'Confirmación por WhatsApp',
+    desc: 'Te contactamos para confirmar tu pedido antes del envío.',
   },
 ];
 
 export default function ProductPage() {
   const { slug } = useParams();
+  const navigate = useNavigate();
   const { data: product, isLoading, error } = useShopifyProductByHandle(slug || '');
   const { data: allProducts } = useShopifyProducts();
   const addItem = useCartStore((s) => s.addItem);
@@ -51,7 +58,6 @@ export default function ProductPage() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
 
-  // Track ViewContent
   useEffect(() => {
     if (product) {
       trackViewContent({
@@ -145,9 +151,28 @@ export default function ProductPage() {
     toast.success('Añadido al carrito', { description: product.title });
   };
 
+  const handleBuyNowCOD = async () => {
+    if (!selectedVariant || !selectedVariant.availableForSale) return;
+    await addItem({
+      product: { node: product } as any,
+      variantId: selectedVariant.id,
+      variantTitle: selectedVariant.title,
+      price: selectedVariant.price,
+      quantity: 1,
+      selectedOptions: selectedVariant.selectedOptions || [],
+    });
+    trackAddToCart({
+      id: selectedVariant.id,
+      title: product.title,
+      price: parseFloat(selectedVariant.price.amount),
+      currency: selectedVariant.price.currencyCode,
+      quantity: 1,
+    });
+    navigate('/checkout/cod');
+  };
+
   const optionGroups = product.options.filter((o) => o.name !== 'Title' || o.values.length > 1);
 
-  // Estimate delivery date
   const deliveryStart = new Date();
   deliveryStart.setDate(deliveryStart.getDate() + 2);
   const deliveryEnd = new Date();
@@ -188,7 +213,6 @@ export default function ProductPage() {
                     <ShoppingBag className="h-16 w-16 text-muted-foreground/30" />
                   </div>
                 )}
-                {/* Gallery navigation */}
                 {allImages.length > 1 && (
                   <>
                     <button
@@ -203,7 +227,6 @@ export default function ProductPage() {
                     >
                       <ChevronRight className="h-5 w-5" />
                     </button>
-                    {/* Progress bar */}
                     <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2">
                       <div className="flex h-1 gap-1">
                         {allImages.map((_, i) => (
@@ -223,7 +246,6 @@ export default function ProductPage() {
                   </>
                 )}
               </div>
-              {/* Thumbnails */}
               {allImages.length > 1 && (
                 <div className="flex gap-2 overflow-auto pb-1">
                   {allImages.map((img, i) => (
@@ -245,13 +267,14 @@ export default function ProductPage() {
           {/* Info */}
           <ScrollReveal direction="right">
             <div className="space-y-5">
-              {/* Badges row */}
+              {/* COD Badge */}
               <div className="flex flex-wrap gap-2">
-                {product.availableForSale && (
-                  <Badge variant="secondary" className="text-xs">Más vendido</Badge>
-                )}
-                {product.tags?.includes('nuevo') && (
-                  <Badge variant="secondary" className="text-xs">Nuevo</Badge>
+                <Badge className="bg-accent text-accent-foreground text-xs gap-1.5 px-3 py-1">
+                  <Banknote className="h-3.5 w-3.5" />
+                  Pago Contra Reembolso disponible
+                </Badge>
+                {hasDiscount && (
+                  <Badge className="bg-destructive text-destructive-foreground font-semibold">-{discount}%</Badge>
                 )}
               </div>
 
@@ -279,15 +302,12 @@ export default function ProductPage() {
                     {price.toFixed(2)} €
                   </span>
                   {hasDiscount && (
-                    <>
-                      <span className="text-lg text-muted-foreground line-through tabular-nums">
-                        {compareAt.toFixed(2)} €
-                      </span>
-                      <Badge className="bg-destructive text-destructive-foreground font-semibold">-{discount}%</Badge>
-                    </>
+                    <span className="text-lg text-muted-foreground line-through tabular-nums">
+                      {compareAt.toFixed(2)} €
+                    </span>
                   )}
                 </div>
-                <p className="mt-0.5 text-xs text-muted-foreground">Impuesto incluido.</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">Impuesto incluido · Envío calculado al confirmar</p>
                 {savings && (
                   <p className="mt-1 text-sm font-medium text-accent">¡Ahorras {savings} €!</p>
                 )}
@@ -328,7 +348,7 @@ export default function ProductPage() {
                 {product.availableForSale ? (
                   <div className="flex items-center gap-2">
                     <div className="h-2 w-2 rounded-full bg-accent" />
-                    <span className="text-sm font-medium text-accent">En existencias</span>
+                    <span className="text-sm font-medium text-accent">En existencias · Envío rápido</span>
                   </div>
                 ) : (
                   <Badge variant="destructive">Agotado</Badge>
@@ -337,42 +357,80 @@ export default function ProductPage() {
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Truck className="h-4 w-4 shrink-0" />
                     <span>
-                      {formatDate(deliveryStart)} – {formatDate(deliveryEnd)} · Fecha estimada de entrega (península)
+                      Entrega estimada: {formatDate(deliveryStart)} – {formatDate(deliveryEnd)} (península)
                     </span>
                   </div>
                 )}
               </div>
 
-              {/* CTA */}
-              <Button
-                size="lg"
-                className="w-full min-h-[48px] text-base font-semibold shadow-md active:scale-[0.97] transition-transform gap-2"
-                onClick={handleAddToCart}
-                disabled={!product.availableForSale || !selectedVariant?.availableForSale || isCartLoading}
-              >
-                {isCartLoading ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                ) : !product.availableForSale ? (
-                  'Agotado'
-                ) : (
-                  <>
-                    <ShoppingCart className="h-5 w-5" />
-                    Agregar al carrito
-                  </>
-                )}
-              </Button>
+              {/* Microcopy COD */}
+              <p className="text-sm text-accent font-medium">
+                💶 Haz tu pedido ahora y paga al recibir en casa
+              </p>
 
-              {/* Trust blocks under CTA */}
-              <div className="space-y-3 rounded-xl border p-4">
-                {trustBlocks.map(({ icon: Icon, title, desc }) => (
-                  <div key={title} className="flex items-start gap-3">
-                    <Icon className="h-5 w-5 shrink-0 text-muted-foreground mt-0.5" />
-                    <div>
-                      <p className="text-sm font-semibold">{title}</p>
-                      <p className="text-xs text-muted-foreground">{desc}</p>
-                    </div>
+              {/* CTAs */}
+              <div className="space-y-3">
+                <Button
+                  size="lg"
+                  className="w-full min-h-[52px] text-base font-semibold shadow-md active:scale-[0.97] transition-transform gap-2 bg-accent text-accent-foreground hover:bg-accent/90"
+                  onClick={handleBuyNowCOD}
+                  disabled={!product.availableForSale || !selectedVariant?.availableForSale || isCartLoading}
+                >
+                  {isCartLoading ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : !product.availableForSale ? (
+                    'Agotado'
+                  ) : (
+                    <>
+                      <Banknote className="h-5 w-5" />
+                      Pedir ahora y pagar al recibir
+                    </>
+                  )}
+                </Button>
+
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full min-h-[48px] text-sm font-medium active:scale-[0.97] transition-transform gap-2"
+                  onClick={handleAddToCart}
+                  disabled={!product.availableForSale || !selectedVariant?.availableForSale || isCartLoading}
+                >
+                  <ShoppingBag className="h-4 w-4" />
+                  Añadir al carrito
+                </Button>
+              </div>
+
+              {/* Trust icons row */}
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { icon: Banknote, text: 'Pago al recibir' },
+                  { icon: Truck, text: 'Envío España' },
+                  { icon: Phone, text: 'Soporte español' },
+                  { icon: RotateCcw, text: 'Devolución 30 días' },
+                ].map(({ icon: Icon, text }) => (
+                  <div key={text} className="flex items-center gap-2 rounded-lg border p-2.5">
+                    <Icon className="h-4 w-4 shrink-0 text-accent" />
+                    <span className="text-xs font-medium">{text}</span>
                   </div>
                 ))}
+              </div>
+
+              {/* Why buy COD block */}
+              <div className="rounded-xl border bg-accent/5 p-4 space-y-3">
+                <h3 className="text-sm font-bold">💰 Por qué comprar aquí con Contra Reembolso</h3>
+                <ul className="space-y-2">
+                  {[
+                    'No arriesgas tu dinero pagando por adelantado',
+                    'Recibes el producto, lo verificas y luego pagas',
+                    'Confirmación del pedido por WhatsApp antes del envío',
+                    'Devolución gratuita si no estás satisfecho',
+                  ].map((text, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+                      <span>{text}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
           </ScrollReveal>
@@ -393,7 +451,7 @@ export default function ProductPage() {
                   value="shipping"
                   className="rounded-none border-b-2 border-transparent px-6 py-3 text-sm font-medium data-[state=active]:border-foreground data-[state=active]:shadow-none"
                 >
-                  Envío y devolución
+                  Envío y COD
                 </TabsTrigger>
                 <TabsTrigger
                   value="faq"
@@ -419,11 +477,20 @@ export default function ProductPage() {
               <TabsContent value="shipping" className="mt-6">
                 <div className="space-y-6">
                   <div className="flex items-start gap-3">
+                    <Banknote className="h-5 w-5 shrink-0 text-accent mt-0.5" />
+                    <div>
+                      <p className="text-sm font-semibold">Pago Contra Reembolso (COD)</p>
+                      <p className="text-sm text-muted-foreground">
+                        No necesitas tarjeta. Pagas al repartidor cuando recibes el producto. Sin coste extra.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
                     <Truck className="h-5 w-5 shrink-0 text-accent mt-0.5" />
                     <div>
                       <p className="text-sm font-semibold">Envío estándar (2–5 días laborables)</p>
                       <p className="text-sm text-muted-foreground">
-                        Disponible para España peninsular, Baleares, Canarias y Portugal. Los pedidos se procesan en 24 horas.
+                        Disponible para España peninsular, Baleares y Canarias. Pedidos procesados en 24 horas.
                       </p>
                     </div>
                   </div>
@@ -432,7 +499,7 @@ export default function ProductPage() {
                     <div>
                       <p className="text-sm font-semibold">Seguimiento incluido</p>
                       <p className="text-sm text-muted-foreground">
-                        Recibirás un email con el número de seguimiento en cuanto tu pedido sea enviado.
+                        Recibirás el número de seguimiento por WhatsApp en cuanto tu pedido sea enviado.
                       </p>
                     </div>
                   </div>
@@ -441,16 +508,7 @@ export default function ProductPage() {
                     <div>
                       <p className="text-sm font-semibold">Devolución gratuita en 30 días</p>
                       <p className="text-sm text-muted-foreground">
-                        Si no estás satisfecho, solicita la devolución sin coste. Recogemos el paquete en tu domicilio.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <ShieldCheck className="h-5 w-5 shrink-0 text-accent mt-0.5" />
-                    <div>
-                      <p className="text-sm font-semibold">Pago 100% seguro</p>
-                      <p className="text-sm text-muted-foreground">
-                        Visa, Mastercard, PayPal y Google Pay. Todos los pagos están cifrados con SSL.
+                        Si no estás satisfecho, solicita la devolución sin coste.
                       </p>
                     </div>
                   </div>
@@ -488,7 +546,7 @@ export default function ProductPage() {
         )}
       </div>
 
-      {/* Sticky mobile CTA */}
+      {/* Sticky mobile CTA — COD focused */}
       <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card/95 p-3 backdrop-blur-md lg:hidden">
         <div className="mx-auto flex max-w-lg items-center gap-3">
           <div className="flex-1 min-w-0">
@@ -498,16 +556,16 @@ export default function ProductPage() {
             </p>
           </div>
           <Button
-            className="shrink-0 min-h-[48px] active:scale-[0.97] gap-2 px-6"
-            onClick={handleAddToCart}
+            className="shrink-0 min-h-[48px] active:scale-[0.97] gap-2 px-5 bg-accent text-accent-foreground hover:bg-accent/90"
+            onClick={handleBuyNowCOD}
             disabled={!product.availableForSale || !selectedVariant?.availableForSale || isCartLoading}
           >
             {isCartLoading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <>
-                <ShoppingCart className="h-4 w-4" />
-                Comprar
+                <Banknote className="h-4 w-4" />
+                Pagar al recibir
               </>
             )}
           </Button>

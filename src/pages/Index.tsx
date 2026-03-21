@@ -3,11 +3,13 @@ import { useShopifyProducts, useShopifyCollections } from '@/hooks/useShopify';
 import { Layout } from '@/components/layout/Layout';
 import { ProductCard } from '@/components/ProductCard';
 import { ScrollReveal } from '@/components/ScrollReveal';
+import { CODFaq } from '@/components/CODFaq';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import {
   ArrowRight, ShoppingBag, Dumbbell, Heart, Sparkles,
   Shield, Star, Truck, RotateCcw, ShieldCheck, Zap,
+  Banknote, Phone, Package, CheckCircle, MessageCircle,
 } from 'lucide-react';
 import bannerDesktop from '@/assets/banner-desktop.png';
 import bannerMobile from '@/assets/banner-mobile.png';
@@ -33,11 +35,39 @@ const categoryBlocks = [
   },
 ];
 
+const codSteps = [
+  {
+    icon: ShoppingBag,
+    step: '1',
+    title: 'Haces tu pedido online',
+    desc: 'Elige tu producto, indica tu dirección y confirma. Sin tarjeta, sin pago anticipado.',
+  },
+  {
+    icon: MessageCircle,
+    step: '2',
+    title: 'Te confirmamos por WhatsApp',
+    desc: 'Nuestro equipo te contacta para verificar el pedido y resolver cualquier duda.',
+  },
+  {
+    icon: Banknote,
+    step: '3',
+    title: 'Recibes y pagas en tu domicilio',
+    desc: 'El repartidor te entrega el paquete y pagas en ese momento. Así de fácil.',
+  },
+];
+
+const guarantees = [
+  { icon: Banknote, text: 'Sin pago por adelantado' },
+  { icon: Phone, text: 'Atención al cliente en español' },
+  { icon: RotateCcw, text: 'Devolución en 30 días' },
+  { icon: Package, text: 'Seguimiento del pedido' },
+];
+
 const whyBuyReasons = [
   {
     icon: ShieldCheck,
-    title: 'Productos testados',
-    desc: 'Cada artículo pasa un control de calidad antes de llegar a tu puerta.',
+    title: 'Sin riesgo para ti',
+    desc: 'No arriesgas tu dinero pagando por adelantado. Pagas solo cuando tienes el producto en tus manos.',
   },
   {
     icon: RotateCcw,
@@ -51,49 +81,55 @@ const whyBuyReasons = [
   },
 ];
 
+// Handles for the "Más vendidos COD" section
+const topCODHandles = [
+  'rodillera-estabilizadora-de-rotula-1',
+  'masajeador-de-rodilla-con-calefactor',
+];
+
 export default function Index() {
   const { data: products, isLoading } = useShopifyProducts();
   const { data: collections } = useShopifyCollections();
 
   const featuredProducts = products?.slice(0, 8) || [];
 
-  // Pick the first product with a discount as "offer of the week"
-  const offerProduct = products?.find((p) => {
-    const price = parseFloat(p.node.priceRange.minVariantPrice.amount);
-    const compare = parseFloat(p.node.compareAtPriceRange.minVariantPrice.amount);
-    return compare > price;
-  });
+  // Top COD products
+  const topCODProducts = products?.filter((p) =>
+    topCODHandles.includes(p.node.handle)
+  ) || [];
 
   return (
     <Layout>
-      {/* Hero */}
+      {/* Hero — COD First */}
       <section className="relative overflow-hidden bg-foreground">
         <div className="hidden md:block">
           <img
             src={bannerDesktop}
-            alt="Revolución Fit — Mejora tu rendimiento"
+            alt="Revolución Fit — Compra y paga al recibir"
             className="w-full object-cover"
             style={{ maxHeight: '520px' }}
           />
         </div>
         <div className="md:hidden">
-          <img src={bannerMobile} alt="Revolución Fit — Entrena con confianza" className="w-full object-cover aspect-[3/4]" />
+          <img src={bannerMobile} alt="Revolución Fit — Pago contra reembolso" className="w-full object-cover aspect-[3/4]" />
         </div>
-        {/* Gradient overlay for readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-        {/* CTA overlay */}
-        <div className="absolute inset-0 flex flex-col items-center justify-end gap-3 pb-8 sm:pb-12">
-          <p className="text-white/80 text-xs font-medium tracking-wide sm:text-sm drop-shadow-sm">
-            Envío rápido · Devolución 30 días · Pago seguro
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+        <div className="absolute inset-0 flex flex-col items-center justify-end gap-3 pb-8 sm:pb-12 px-4 text-center">
+          <h1 className="text-white text-xl sm:text-3xl font-bold tracking-tight drop-shadow-lg max-w-2xl" style={{ fontFamily: 'Space Grotesk', lineHeight: '1.15' }}>
+            Tu bienestar, sin riesgo: compra hoy y paga cuando lo recibas
+          </h1>
+          <p className="text-white/80 text-xs sm:text-sm max-w-md drop-shadow-sm">
+            Sin tarjeta, sin pago anticipado. Pedido rápido y confirmación inmediata.
           </p>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-center gap-3 mt-1">
             <Button
               size="lg"
               asChild
-              className="shadow-lg text-base font-semibold active:scale-[0.97] bg-accent text-accent-foreground hover:bg-accent/90"
+              className="shadow-lg text-base font-semibold active:scale-[0.97] bg-accent text-accent-foreground hover:bg-accent/90 min-h-[48px] gap-2"
             >
               <Link to="/colecciones">
-                Comprar ahora <ArrowRight className="h-4 w-4 ml-1" />
+                <Banknote className="h-4 w-4" />
+                Comprar con Pago Contra Reembolso
               </Link>
             </Button>
             <Button
@@ -102,11 +138,83 @@ export default function Index() {
               asChild
               className="shadow-lg text-base font-semibold active:scale-[0.97] border-white/50 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20 hover:text-white"
             >
-              <Link to="/colecciones">Ver catálogo</Link>
+              <Link to="/colecciones">
+                Ver productos más vendidos <ArrowRight className="h-4 w-4 ml-1" />
+              </Link>
             </Button>
           </div>
         </div>
       </section>
+
+      {/* ── Cómo funciona el Pago Contra Reembolso ── */}
+      <section className="border-b bg-card">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:py-14">
+          <ScrollReveal>
+            <h2 className="text-center text-2xl font-bold tracking-tight sm:text-3xl" style={{ lineHeight: '1.1' }}>
+              Cómo funciona el Pago Contra Reembolso
+            </h2>
+            <p className="mx-auto mt-2 max-w-lg text-center text-sm text-muted-foreground">
+              Compra sin riesgo en 3 sencillos pasos
+            </p>
+          </ScrollReveal>
+
+          <div className="mt-8 grid gap-6 sm:grid-cols-3">
+            {codSteps.map((s, i) => (
+              <ScrollReveal key={s.step} delay={i * 0.1}>
+                <div className="flex flex-col items-center text-center rounded-xl border bg-background p-6 shadow-sm">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent/10 mb-4">
+                    <s.icon className="h-7 w-7 text-accent" />
+                  </div>
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-accent-foreground text-sm font-bold mb-3">
+                    {s.step}
+                  </div>
+                  <h3 className="font-semibold text-lg">{s.title}</h3>
+                  <p className="mt-2 text-sm text-muted-foreground max-w-[260px]">{s.desc}</p>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+
+          {/* Guarantees strip */}
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {guarantees.map(({ icon: Icon, text }) => (
+              <div key={text} className="flex items-center gap-2 rounded-lg border bg-background p-3">
+                <Icon className="h-5 w-5 shrink-0 text-accent" />
+                <span className="text-xs font-medium sm:text-sm">{text}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Más vendidos COD ── */}
+      {topCODProducts.length > 0 && (
+        <section className="border-b bg-accent/5">
+          <div className="mx-auto max-w-7xl px-4 py-10 sm:py-14">
+            <ScrollReveal>
+              <div className="text-center">
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-3 py-1 text-xs font-semibold text-accent mb-3">
+                  <Star className="h-3.5 w-3.5" />
+                  Los favoritos
+                </div>
+                <h2 className="text-2xl font-bold tracking-tight sm:text-3xl" style={{ lineHeight: '1.1' }}>
+                  Más vendidos para Pago Contra Reembolso
+                </h2>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Los productos más pedidos por nuestros clientes con pago al recibir.
+                </p>
+              </div>
+            </ScrollReveal>
+            <div className="mt-8 grid gap-6 sm:grid-cols-2 max-w-2xl mx-auto">
+              {topCODProducts.map((product, i) => (
+                <ScrollReveal key={product.node.id} delay={i * 0.08}>
+                  <ProductCard product={product} />
+                </ScrollReveal>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Best sellers */}
       <section className="mx-auto max-w-7xl px-4 py-10 sm:py-14">
@@ -114,10 +222,10 @@ export default function Index() {
           <div className="flex items-end justify-between">
             <div>
               <h2 className="text-2xl font-bold tracking-tight sm:text-3xl" style={{ lineHeight: '1.1' }}>
-                Los más vendidos
+                Todos los productos
               </h2>
               <p className="mt-1 text-muted-foreground text-sm sm:text-base">
-                Lo más buscado por nuestra comunidad fitness.
+                Equipamiento seleccionado con pago contra reembolso disponible.
               </p>
             </div>
             <Button variant="outline" asChild className="hidden sm:flex gap-1 text-accent border-accent/30 hover:bg-accent/10 hover:text-accent">
@@ -143,7 +251,7 @@ export default function Index() {
             <ShoppingBag className="h-12 w-12 text-muted-foreground/40" />
             <h3 className="mt-4 text-lg font-semibold">No hay productos todavía</h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              Los productos aparecerán aquí cuando se añadan a la tienda Shopify.
+              Los productos aparecerán aquí cuando se añadan a la tienda.
             </p>
           </div>
         ) : (
@@ -165,61 +273,8 @@ export default function Index() {
         </div>
       </section>
 
-      {/* ── Oferta de la semana ── */}
-      {offerProduct && (
-        <section className="border-y bg-secondary/40">
-          <div className="mx-auto max-w-7xl px-4 py-10 sm:py-14">
-            <ScrollReveal>
-              <div className="flex flex-col items-center gap-6 sm:flex-row sm:gap-10">
-                {/* Image */}
-                <Link
-                  to={`/products/${offerProduct.node.handle}`}
-                  className="w-full max-w-xs shrink-0 overflow-hidden rounded-xl border bg-card shadow-sm transition-shadow hover:shadow-md active:scale-[0.98]"
-                >
-                  {offerProduct.node.images.edges[0]?.node && (
-                    <img
-                      src={offerProduct.node.images.edges[0].node.url}
-                      alt={offerProduct.node.title}
-                      className="aspect-square w-full object-cover"
-                      loading="lazy"
-                    />
-                  )}
-                </Link>
-                {/* Copy */}
-                <div className="flex-1 text-center sm:text-left">
-                  <div className="inline-flex items-center gap-1.5 rounded-full bg-destructive/10 px-3 py-1 text-xs font-semibold text-destructive">
-                    <Zap className="h-3.5 w-3.5" />
-                    Oferta de la semana
-                  </div>
-                  <h2 className="mt-3 text-2xl font-bold tracking-tight sm:text-3xl" style={{ lineHeight: '1.1' }}>
-                    {offerProduct.node.title}
-                  </h2>
-                  <div className="mt-3 flex items-baseline justify-center gap-3 sm:justify-start">
-                    <span className="text-3xl font-bold text-destructive tabular-nums">
-                      {parseFloat(offerProduct.node.priceRange.minVariantPrice.amount).toFixed(2)} €
-                    </span>
-                    <span className="text-lg text-muted-foreground line-through tabular-nums">
-                      {parseFloat(offerProduct.node.compareAtPriceRange.minVariantPrice.amount).toFixed(2)} €
-                    </span>
-                  </div>
-                  <p className="mt-2 text-sm text-muted-foreground max-w-md mx-auto sm:mx-0">
-                    {offerProduct.node.description.slice(0, 120)}
-                    {offerProduct.node.description.length > 120 ? '…' : ''}
-                  </p>
-                  <Button asChild size="lg" className="mt-5 active:scale-[0.97] gap-1.5 bg-accent text-accent-foreground hover:bg-accent/90">
-                    <Link to={`/products/${offerProduct.node.handle}`}>
-                      Ver oferta <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-            </ScrollReveal>
-          </div>
-        </section>
-      )}
-
       {/* Popular categories */}
-      <section className="border-b bg-card">
+      <section className="border-y bg-card">
         <div className="mx-auto max-w-7xl px-4 py-10 sm:py-14">
           <ScrollReveal>
             <h2 className="text-center text-2xl font-bold tracking-tight sm:text-3xl" style={{ lineHeight: '1.1' }}>
@@ -249,15 +304,15 @@ export default function Index() {
         </div>
       </section>
 
-      {/* ── Por qué comprar con Revolución Fit ── */}
+      {/* ── Por qué comprar con Contra Reembolso ── */}
       <section className="bg-foreground text-background">
         <div className="mx-auto max-w-7xl px-4 py-14 sm:py-20">
           <ScrollReveal>
             <h2 className="text-center text-2xl font-bold tracking-tight sm:text-3xl" style={{ lineHeight: '1.1' }}>
-              Por qué comprar con Revolución Fit
+              Por qué comprar con Pago Contra Reembolso
             </h2>
             <p className="mx-auto mt-3 max-w-2xl text-center text-background/70 text-sm sm:text-base">
-              Equipamiento seleccionado para mejorar tu comodidad y rendimiento. Sin letra pequeña.
+              Sin riesgo, sin pago anticipado. Recibes primero, pagas después.
             </p>
           </ScrollReveal>
 
@@ -274,6 +329,13 @@ export default function Index() {
               </ScrollReveal>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── COD FAQ ── */}
+      <section className="border-t">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:py-14">
+          <CODFaq />
         </div>
       </section>
     </Layout>

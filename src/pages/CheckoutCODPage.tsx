@@ -6,20 +6,23 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useCartStore } from '@/stores/cartStore';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Loader2, CheckCircle, Package, Truck, User, ArrowLeft } from 'lucide-react';
+import { Loader2, CheckCircle, Package, Truck, User, ArrowLeft, Banknote, ShieldCheck, Phone } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { z } from 'zod';
 
+const spainPhoneRegex = /^(\+34)?\s?[6-9]\d{8}$/;
+
 const orderSchema = z.object({
   customer_name: z.string().trim().min(2, 'Nombre obligatorio').max(100),
-  customer_phone: z.string().trim().min(6, 'Teléfono obligatorio').max(20),
+  customer_phone: z.string().trim().regex(spainPhoneRegex, 'Introduce un teléfono español válido (ej: 612345678)'),
   customer_email: z.string().trim().email('Email inválido').max(255).or(z.literal('')),
   address: z.string().trim().min(3, 'Dirección obligatoria').max(300),
   city: z.string().trim().min(2, 'Ciudad obligatoria').max(100),
-  postal_code: z.string().trim().min(3, 'Código postal obligatorio').max(15),
+  postal_code: z.string().trim().min(4, 'Código postal obligatorio').max(15),
   province: z.string().trim().min(2, 'Provincia obligatoria').max(100),
   country: z.string().trim().min(2).max(60),
   notes: z.string().max(500).optional(),
@@ -28,9 +31,9 @@ const orderSchema = z.object({
 type FormData = z.infer<typeof orderSchema>;
 
 const STEPS = [
-  { id: 'customer', label: 'Datos del cliente', icon: User },
-  { id: 'shipping', label: 'Envío', icon: Truck },
-  { id: 'confirm', label: 'Confirmar pedido', icon: Package },
+  { id: 'customer', label: 'Tus datos', icon: User },
+  { id: 'shipping', label: 'Dirección', icon: Truck },
+  { id: 'confirm', label: 'Confirmar', icon: Package },
 ] as const;
 
 export default function CheckoutCODPage() {
@@ -39,6 +42,7 @@ export default function CheckoutCODPage() {
   const [step, setStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
+  const [codConfirmed, setCodConfirmed] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
 
   const [form, setForm] = useState<FormData>({
@@ -54,7 +58,6 @@ export default function CheckoutCODPage() {
   });
 
   const totalPrice = items.reduce((s, i) => s + parseFloat(i.price.amount) * i.quantity, 0);
-  const currency = items[0]?.price.currencyCode || 'EUR';
 
   const update = (field: keyof FormData, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -62,26 +65,21 @@ export default function CheckoutCODPage() {
   };
 
   const validateStep = () => {
-    const fieldsPerStep: (keyof FormData)[][] = [
-      ['customer_name', 'customer_phone'],
-      ['address', 'city', 'postal_code', 'province', 'country'],
-      [],
-    ];
-    const partial: Partial<FormData> = {};
-    fieldsPerStep[step].forEach(k => { (partial as any)[k] = form[k]; });
-    const result = orderSchema.partial().safeParse(partial);
-    // Manually validate required fields
     const newErrors: Partial<Record<keyof FormData, string>> = {};
-    fieldsPerStep[step].forEach(k => {
-      const val = form[k]?.trim();
-      if (!val || val.length < 2) {
-        newErrors[k] = 'Este campo es obligatorio';
-      }
-    });
-    if (form.customer_email && step === 0) {
-      const emailResult = z.string().email().safeParse(form.customer_email);
-      if (!emailResult.success) newErrors.customer_email = 'Email inválido';
+
+    if (step === 0) {
+      if (!form.customer_name.trim() || form.customer_name.trim().length < 2) newErrors.customer_name = 'Nombre obligatorio';
+      if (!spainPhoneRegex.test(form.customer_phone.trim().replace(/\s/g, ''))) newErrors.customer_phone = 'Introduce un teléfono español válido (ej: 612345678)';
+      if (form.customer_email && !z.string().email().safeParse(form.customer_email).success) newErrors.customer_email = 'Email inválido';
     }
+
+    if (step === 1) {
+      if (!form.address.trim() || form.address.trim().length < 3) newErrors.address = 'Dirección obligatoria';
+      if (!form.city.trim() || form.city.trim().length < 2) newErrors.city = 'Ciudad obligatoria';
+      if (!form.postal_code.trim() || form.postal_code.trim().length < 4) newErrors.postal_code = 'Código postal obligatorio';
+      if (!form.province.trim() || form.province.trim().length < 2) newErrors.province = 'Provincia obligatoria';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -92,6 +90,10 @@ export default function CheckoutCODPage() {
 
   const handleSubmit = async () => {
     if (!validateStep()) return;
+    if (!codConfirmed) {
+      toast.error('Confirma que entiendes el pago contra reembolso');
+      return;
+    }
     setIsSubmitting(true);
     try {
       const orderItems = items.map(i => ({
@@ -156,11 +158,32 @@ export default function CheckoutCODPage() {
             <CheckCircle className="h-8 w-8 text-accent" />
           </div>
           <h1 className="text-2xl font-bold mb-2">¡Pedido confirmado!</h1>
-          <p className="text-muted-foreground mb-6">
-            Hemos recibido tu pedido. Te contactaremos pronto para confirmar el envío.
-            El pago se realizará en el momento de la entrega.
+          <p className="text-muted-foreground mb-4">
+            Hemos recibido tu pedido correctamente.
           </p>
-          <Button onClick={() => navigate('/')}>Volver a la tienda</Button>
+          <div className="rounded-xl border bg-accent/5 p-5 text-left space-y-3 mb-6">
+            <div className="flex items-start gap-3">
+              <Phone className="h-5 w-5 shrink-0 text-accent mt-0.5" />
+              <div>
+                <p className="text-sm font-semibold">Te contactaremos para confirmar</p>
+                <p className="text-sm text-muted-foreground">
+                  Nuestro equipo te llamará o escribirá por WhatsApp para confirmar el pedido antes del envío.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Banknote className="h-5 w-5 shrink-0 text-accent mt-0.5" />
+              <div>
+                <p className="text-sm font-semibold">No se ha realizado ningún cobro</p>
+                <p className="text-sm text-muted-foreground">
+                  Pagarás al recibir el producto en tu domicilio. Sin cobro online.
+                </p>
+              </div>
+            </div>
+          </div>
+          <Button onClick={() => navigate('/')} className="bg-accent text-accent-foreground hover:bg-accent/90">
+            Volver a la tienda
+          </Button>
         </div>
       </Layout>
     );
@@ -174,11 +197,14 @@ export default function CheckoutCODPage() {
         </Button>
 
         <ScrollReveal>
-          <h1 className="text-2xl font-bold tracking-tight mb-1" style={{ fontFamily: 'Space Grotesk' }}>
-            Checkout — Pago contra entrega
-          </h1>
+          <div className="flex items-center gap-3 mb-1">
+            <Banknote className="h-6 w-6 text-accent" />
+            <h1 className="text-2xl font-bold tracking-tight" style={{ fontFamily: 'Space Grotesk' }}>
+              Pago Contra Reembolso
+            </h1>
+          </div>
           <p className="text-sm text-muted-foreground mb-8">
-            Completa tus datos. Pagarás cuando recibas el pedido.
+            Completa tus datos. Pagarás cuando recibas el pedido en tu domicilio.
           </p>
         </ScrollReveal>
 
@@ -212,11 +238,14 @@ export default function CheckoutCODPage() {
                 <FieldGroup label="Nombre completo *" error={errors.customer_name}>
                   <Input value={form.customer_name} onChange={e => update('customer_name', e.target.value)} placeholder="Tu nombre completo" />
                 </FieldGroup>
-                <FieldGroup label="Teléfono *" error={errors.customer_phone}>
-                  <Input type="tel" value={form.customer_phone} onChange={e => update('customer_phone', e.target.value)} placeholder="+34 600 000 000" />
+                <FieldGroup label="Teléfono (España) *" error={errors.customer_phone}>
+                  <Input type="tel" value={form.customer_phone} onChange={e => update('customer_phone', e.target.value)} placeholder="612 345 678" />
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    Te contactaremos por WhatsApp para confirmar tu pedido.
+                  </p>
                 </FieldGroup>
-                <FieldGroup label="Correo electrónico" error={errors.customer_email}>
-                  <Input type="email" value={form.customer_email} onChange={e => update('customer_email', e.target.value)} placeholder="tu@email.com (opcional)" />
+                <FieldGroup label="Correo electrónico (opcional)" error={errors.customer_email}>
+                  <Input type="email" value={form.customer_email} onChange={e => update('customer_email', e.target.value)} placeholder="tu@email.com" />
                 </FieldGroup>
               </div>
             )}
@@ -252,7 +281,6 @@ export default function CheckoutCODPage() {
             {step === 2 && (
               <div className="space-y-6">
                 <h2 className="font-semibold text-lg">Confirmar pedido</h2>
-                {/* Summary of customer info */}
                 <div className="rounded-lg bg-muted/50 p-4 text-sm space-y-1">
                   <p><span className="font-medium">Nombre:</span> {form.customer_name}</p>
                   <p><span className="font-medium">Teléfono:</span> {form.customer_phone}</p>
@@ -262,7 +290,6 @@ export default function CheckoutCODPage() {
                   {form.notes && <p><span className="font-medium">Notas:</span> {form.notes}</p>}
                 </div>
 
-                {/* Items */}
                 <div className="space-y-3">
                   {items.map(item => (
                     <div key={item.variantId} className="flex gap-3 items-center">
@@ -280,10 +307,30 @@ export default function CheckoutCODPage() {
                   ))}
                 </div>
 
-                <div className="rounded-lg border bg-accent/5 p-4">
-                  <p className="text-sm text-muted-foreground mb-1">Método de pago</p>
-                  <p className="font-semibold">💰 Pago contra entrega (COD)</p>
-                  <p className="text-xs text-muted-foreground mt-1">Pagas cuando recibes el producto en tu domicilio.</p>
+                <div className="rounded-xl border bg-accent/5 p-4 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Banknote className="h-5 w-5 text-accent" />
+                    <p className="font-semibold">💰 Pago Contra Reembolso (COD)</p>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    No se realizará ningún cobro online. Pagas cuando recibes el producto en tu domicilio.
+                  </p>
+                </div>
+
+                {/* COD confirmation checkbox */}
+                <div className="flex items-start gap-3 rounded-lg border p-4">
+                  <Checkbox
+                    id="cod-confirm"
+                    checked={codConfirmed}
+                    onCheckedChange={(checked) => setCodConfirmed(checked === true)}
+                    className="mt-0.5"
+                  />
+                  <label htmlFor="cod-confirm" className="text-sm cursor-pointer">
+                    <span className="font-medium">Entiendo que este pedido se paga al recibir.</span>
+                    <span className="text-muted-foreground block mt-0.5">
+                      No se realizará ningún cobro hasta que el repartidor me entregue el paquete.
+                    </span>
+                  </label>
                 </div>
               </div>
             )}
@@ -296,7 +343,11 @@ export default function CheckoutCODPage() {
               {step < 2 ? (
                 <Button onClick={nextStep} className="ml-auto">Continuar</Button>
               ) : (
-                <Button onClick={handleSubmit} disabled={isSubmitting} className="ml-auto gap-2">
+                <Button
+                  onClick={handleSubmit}
+                  disabled={isSubmitting || !codConfirmed}
+                  className="ml-auto gap-2 bg-accent text-accent-foreground hover:bg-accent/90"
+                >
                   {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
                   Confirmar pedido
                 </Button>
@@ -305,9 +356,9 @@ export default function CheckoutCODPage() {
           </div>
 
           {/* Order summary sidebar */}
-          <div className="rounded-xl border bg-card p-5 h-fit lg:sticky lg:top-24">
-            <h3 className="font-semibold mb-4">Resumen del pedido</h3>
-            <div className="space-y-3 mb-4">
+          <div className="rounded-xl border bg-card p-5 h-fit lg:sticky lg:top-24 space-y-4">
+            <h3 className="font-semibold">Resumen del pedido</h3>
+            <div className="space-y-3">
               {items.map(item => (
                 <div key={item.variantId} className="flex justify-between text-sm">
                   <span className="truncate max-w-[180px]">{item.product.node.title} ×{item.quantity}</span>
@@ -325,9 +376,23 @@ export default function CheckoutCODPage() {
                 <span className="text-xs text-accent font-medium">Se confirmará</span>
               </div>
             </div>
-            <div className="border-t mt-3 pt-3 flex justify-between font-bold">
+            <div className="border-t pt-3 flex justify-between font-bold">
               <span>Total</span>
               <span className="tabular-nums text-lg">€{totalPrice.toFixed(2)}</span>
+            </div>
+
+            {/* Trust block in sidebar */}
+            <div className="border-t pt-4 space-y-2">
+              {[
+                { icon: ShieldCheck, text: 'No se realizará ningún cobro online' },
+                { icon: Phone, text: 'Confirmación por WhatsApp' },
+                { icon: Banknote, text: 'Pagas al recibir en tu domicilio' },
+              ].map(({ icon: Icon, text }) => (
+                <div key={text} className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Icon className="h-4 w-4 shrink-0 text-accent" />
+                  <span>{text}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>

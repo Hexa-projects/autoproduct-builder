@@ -1,20 +1,19 @@
-import { RotateCcw, CreditCard, MapPin, Truck } from 'lucide-react';
+import { Truck, Banknote, ShieldCheck } from 'lucide-react';
 
 const items = [
-  { icon: Truck, text: 'Envío 2–5 días' },
-  { icon: RotateCcw, text: 'Devolución 30 días' },
-  { icon: CreditCard, text: 'Pago seguro' },
-  { icon: MapPin, text: 'España e Islas' },
+  { icon: Truck, text: 'Envío rápido España' },
+  { icon: Banknote, text: 'Pago Contra Reembolso' },
+  { icon: ShieldCheck, text: 'Paga al recibir' },
 ];
 
 export function TrustBar() {
   return (
-    <div className="bg-foreground text-background">
-      <div className="mx-auto flex max-w-7xl items-center justify-center gap-6 px-4 py-2 sm:gap-10">
+    <div className="bg-accent text-accent-foreground">
+      <div className="mx-auto flex max-w-7xl items-center justify-center gap-4 px-4 py-2 sm:gap-8">
         {items.map(({ icon: Icon, text }) => (
           <div key={text} className="flex items-center gap-1.5 shrink-0">
-            <Icon className="h-3.5 w-3.5 shrink-0 opacity-70" />
-            <span className="text-[11px] font-medium sm:text-xs">{text}</span>
+            <Icon className="h-3.5 w-3.5 shrink-0" />
+            <span className="text-[11px] font-semibold sm:text-xs">{text}</span>
           </div>
         ))}
       </div>
