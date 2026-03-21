@@ -46,6 +46,15 @@ function fbq(eventName: string, params?: Record<string, unknown>) {
   pixel('track', eventName, { ...params, eventID: eventId });
 }
 
+function fbqCustom(eventName: string, params?: Record<string, unknown>) {
+  if (typeof window === 'undefined') return;
+  const pixel = (window as any).fbq;
+  if (typeof pixel !== 'function') return;
+
+  const eventId = uid();
+  pixel('trackCustom', eventName, { ...params, eventID: eventId });
+}
+
 // ─── Standard events ────────────────────────────────────────────────
 
 export function trackViewContent(product: {
@@ -96,4 +105,22 @@ export function trackPageView() {
   if (typeof window !== 'undefined' && typeof (window as any).fbq === 'function') {
     (window as any).fbq('track', 'PageView');
   }
+}
+
+// ─── Custom CRO events ─────────────────────────────────────────────
+
+export function trackClickCTACOD(product: { id: string; title: string }) {
+  fbqCustom('Click_CTA_COD', {
+    content_name: product.title,
+    content_ids: [product.id],
+  });
+}
+
+export function trackSelectKit(kit: '1x' | '2x' | '3x', product: { id: string; title: string; value: number; currency: string }) {
+  fbqCustom(`Select_Kit_${kit}`, {
+    content_name: product.title,
+    content_ids: [product.id],
+    value: product.value,
+    currency: product.currency,
+  });
 }
