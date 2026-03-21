@@ -79,13 +79,19 @@ export default function Index() {
         <div className="md:hidden">
           <img src={bannerMobile} alt="Revolución Fit — Entrena con confianza" className="w-full object-cover aspect-[3/4]" />
         </div>
+        {/* Gradient overlay for readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
         {/* CTA overlay */}
         <div className="absolute inset-0 flex flex-col items-center justify-end gap-3 pb-8 sm:pb-12">
-          <p className="text-background/80 text-xs font-medium tracking-wide sm:text-sm">
+          <p className="text-white/80 text-xs font-medium tracking-wide sm:text-sm drop-shadow-sm">
             Envío rápido · Devolución 30 días · Pago seguro
           </p>
           <div className="flex items-center gap-3">
-            <Button size="lg" asChild className="shadow-lg text-base font-semibold active:scale-[0.97]">
+            <Button
+              size="lg"
+              asChild
+              className="shadow-lg text-base font-semibold active:scale-[0.97] bg-accent text-accent-foreground hover:bg-accent/90"
+            >
               <Link to="/colecciones">
                 Comprar ahora <ArrowRight className="h-4 w-4 ml-1" />
               </Link>
@@ -94,7 +100,7 @@ export default function Index() {
               size="lg"
               variant="outline"
               asChild
-              className="shadow-lg text-base font-semibold active:scale-[0.97] border-background/30 text-background hover:bg-background/10 hover:text-background"
+              className="shadow-lg text-base font-semibold active:scale-[0.97] border-white/50 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20 hover:text-white"
             >
               <Link to="/colecciones">Ver catálogo</Link>
             </Button>
@@ -114,7 +120,7 @@ export default function Index() {
                 Lo más buscado por nuestra comunidad fitness.
               </p>
             </div>
-            <Button variant="ghost" asChild className="hidden sm:flex gap-1">
+            <Button variant="outline" asChild className="hidden sm:flex gap-1 text-accent border-accent/30 hover:bg-accent/10 hover:text-accent">
               <Link to="/colecciones">
                 Ver todo <ArrowRight className="h-4 w-4" />
               </Link>
@@ -151,7 +157,7 @@ export default function Index() {
         )}
 
         <div className="mt-8 text-center sm:hidden">
-          <Button variant="outline" asChild>
+          <Button variant="outline" asChild className="text-accent border-accent/30 hover:bg-accent/10 hover:text-accent">
             <Link to="/colecciones" className="gap-1">
               Ver todo el catálogo <ArrowRight className="h-4 w-4" />
             </Link>
@@ -200,7 +206,7 @@ export default function Index() {
                     {offerProduct.node.description.slice(0, 120)}
                     {offerProduct.node.description.length > 120 ? '…' : ''}
                   </p>
-                  <Button asChild size="lg" className="mt-5 active:scale-[0.97] gap-1.5">
+                  <Button asChild size="lg" className="mt-5 active:scale-[0.97] gap-1.5 bg-accent text-accent-foreground hover:bg-accent/90">
                     <Link to={`/products/${offerProduct.node.handle}`}>
                       Ver oferta <ArrowRight className="h-4 w-4" />
                     </Link>
@@ -226,14 +232,14 @@ export default function Index() {
               <ScrollReveal key={cat.handle} delay={i * 0.08}>
                 <Link
                   to={`/colecciones/${cat.handle}`}
-                  className="group relative flex flex-col items-center overflow-hidden rounded-xl border bg-background p-8 text-center shadow-sm transition-all duration-300 hover:shadow-md active:scale-[0.98]"
+                  className="group relative flex flex-col items-center overflow-hidden rounded-xl border bg-background p-8 text-center shadow-sm transition-all duration-300 hover:shadow-md hover:border-accent/30 active:scale-[0.98]"
                 >
-                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-secondary">
-                    <cat.icon className="h-7 w-7 text-foreground" />
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent/10">
+                    <cat.icon className="h-7 w-7 text-accent" />
                   </div>
                   <h3 className="mt-4 text-lg font-semibold">{cat.title}</h3>
                   <p className="mt-1.5 text-sm text-muted-foreground max-w-[220px]">{cat.desc}</p>
-                  <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-foreground group-hover:underline">
+                  <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-accent group-hover:underline">
                     Ver productos <ArrowRight className="h-3.5 w-3.5" />
                   </span>
                 </Link>
