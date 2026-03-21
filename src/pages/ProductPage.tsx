@@ -184,10 +184,10 @@ export default function ProductPage() {
 
   return (
     <Layout>
-      <div className="mx-auto max-w-6xl px-4 py-4 sm:py-6">
+      <div className="mx-auto max-w-6xl px-3 py-3 sm:px-4 sm:py-6">
         {/* Breadcrumb */}
         <ScrollReveal>
-          <nav className="mb-4 flex items-center gap-2 text-sm text-muted-foreground overflow-x-auto">
+          <nav className="mb-3 flex items-center gap-1.5 text-xs text-muted-foreground overflow-x-auto sm:text-sm sm:gap-2 sm:mb-4">
             <Link to="/" className="transition-colors hover:text-foreground shrink-0">Inicio</Link>
             <span className="shrink-0">&gt;</span>
             <Link to="/colecciones" className="transition-colors hover:text-foreground shrink-0">Catálogo</Link>
@@ -197,7 +197,7 @@ export default function ProductPage() {
         </ScrollReveal>
 
         {/* Main product grid */}
-        <div className="grid gap-8 lg:grid-cols-2">
+        <div className="grid gap-5 lg:grid-cols-2 lg:gap-8">
           {/* Gallery */}
           <ScrollReveal direction="left">
             <div className="space-y-3">
@@ -266,12 +266,12 @@ export default function ProductPage() {
 
           {/* Info */}
           <ScrollReveal direction="right">
-            <div className="space-y-5">
+            <div className="space-y-4 sm:space-y-5">
               {/* COD Badge */}
-              <div className="flex flex-wrap gap-2">
-                <Badge className="bg-accent text-accent-foreground text-xs gap-1.5 px-3 py-1">
-                  <Banknote className="h-3.5 w-3.5" />
-                  Pago Contra Reembolso disponible
+              <div className="flex flex-wrap gap-1.5">
+                <Badge className="bg-accent text-accent-foreground text-[10px] gap-1 px-2 py-0.5 sm:text-xs sm:gap-1.5 sm:px-3 sm:py-1">
+                  <Banknote className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                  Pago Contra Reembolso
                 </Badge>
                 {hasDiscount && (
                   <Badge className="bg-destructive text-destructive-foreground font-semibold">-{discount}%</Badge>
@@ -280,14 +280,14 @@ export default function ProductPage() {
 
               {/* Title + bullet benefits */}
               <div>
-                <h1 className="text-2xl font-bold tracking-tight sm:text-3xl" style={{ lineHeight: '1.1' }}>
+                <h1 className="text-xl font-bold tracking-tight sm:text-3xl" style={{ lineHeight: '1.1' }}>
                   {product.title}
                 </h1>
                 {product.description && (
-                  <ul className="mt-3 space-y-1">
+                  <ul className="mt-2 space-y-1 sm:mt-3">
                     {product.description.split('. ').filter(Boolean).slice(0, 3).map((line, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+                      <li key={i} className="flex items-start gap-1.5 text-xs text-muted-foreground sm:gap-2 sm:text-sm">
+                        <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent sm:h-4 sm:w-4" />
                         <span>{line.trim().replace(/\.$/, '')}</span>
                       </li>
                     ))}
@@ -297,27 +297,27 @@ export default function ProductPage() {
 
               {/* Price */}
               <div>
-                <div className="flex items-baseline gap-3">
-                  <span className={`text-3xl font-bold tabular-nums ${hasDiscount ? 'text-destructive' : ''}`}>
+                <div className="flex items-baseline gap-2 sm:gap-3">
+                  <span className={`text-2xl font-bold tabular-nums sm:text-3xl ${hasDiscount ? 'text-destructive' : ''}`}>
                     {price.toFixed(2)} €
                   </span>
                   {hasDiscount && (
-                    <span className="text-lg text-muted-foreground line-through tabular-nums">
+                    <span className="text-sm text-muted-foreground line-through tabular-nums sm:text-lg">
                       {compareAt.toFixed(2)} €
                     </span>
                   )}
                 </div>
-                <p className="mt-0.5 text-xs text-muted-foreground">Impuesto incluido · Envío calculado al confirmar</p>
+                <p className="mt-0.5 text-[11px] text-muted-foreground sm:text-xs">Impuesto incluido</p>
                 {savings && (
-                  <p className="mt-1 text-sm font-medium text-accent">¡Ahorras {savings} €!</p>
+                  <p className="mt-0.5 text-xs font-medium text-accent sm:text-sm">¡Ahorras {savings} €!</p>
                 )}
               </div>
 
               {/* Variant selectors */}
               {optionGroups.map((option) => (
-                <div key={option.name} className="space-y-2">
-                  <p className="text-sm font-semibold">{option.name}</p>
-                  <div className="flex flex-wrap gap-2">
+                <div key={option.name} className="space-y-1.5 sm:space-y-2">
+                  <p className="text-xs font-semibold sm:text-sm">{option.name}</p>
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2">
                     {option.values.map((value) => {
                       const matchingVariant = product.variants.edges.find((v) =>
                         v.node.selectedOptions.some((o) => o.name === option.name && o.value === value)
@@ -333,7 +333,7 @@ export default function ProductPage() {
                           size="sm"
                           disabled={isOOS}
                           onClick={() => matchingVariant && setSelectedVariantId(matchingVariant.node.id)}
-                          className={`active:scale-[0.97] ${isOOS ? 'line-through' : ''}`}
+                          className={`active:scale-[0.97] text-xs h-8 px-3 sm:text-sm sm:h-9 ${isOOS ? 'line-through' : ''}`}
                         >
                           {value}
                         </Button>
@@ -344,46 +344,46 @@ export default function ProductPage() {
               ))}
 
               {/* Stock + delivery */}
-              <div className="space-y-2">
+              <div className="space-y-1.5 sm:space-y-2">
                 {product.availableForSale ? (
-                  <div className="flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full bg-accent" />
-                    <span className="text-sm font-medium text-accent">En existencias · Envío rápido</span>
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-accent sm:h-2 sm:w-2" />
+                    <span className="text-xs font-medium text-accent sm:text-sm">En existencias · Envío rápido</span>
                   </div>
                 ) : (
-                  <Badge variant="destructive">Agotado</Badge>
+                  <Badge variant="destructive" className="text-xs">Agotado</Badge>
                 )}
                 {product.availableForSale && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Truck className="h-4 w-4 shrink-0" />
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground sm:gap-2 sm:text-sm">
+                    <Truck className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
                     <span>
-                      Entrega estimada: {formatDate(deliveryStart)} – {formatDate(deliveryEnd)} (península)
+                      Entrega: {formatDate(deliveryStart)} – {formatDate(deliveryEnd)}
                     </span>
                   </div>
                 )}
               </div>
 
               {/* Microcopy COD */}
-              <p className="text-sm text-accent font-medium">
-                💶 Haz tu pedido ahora y paga al recibir en casa
+              <p className="text-xs text-accent font-medium sm:text-sm">
+                💶 Haz tu pedido y paga al recibir
               </p>
 
               {/* CTAs */}
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 <Button
                   size="lg"
-                  className="w-full min-h-[52px] text-base font-semibold shadow-md active:scale-[0.97] transition-transform gap-2 bg-accent text-accent-foreground hover:bg-accent/90"
+                  className="w-full min-h-[48px] text-sm font-semibold shadow-md active:scale-[0.97] transition-transform gap-2 bg-accent text-accent-foreground hover:bg-accent/90 sm:min-h-[52px] sm:text-base"
                   onClick={handleBuyNowCOD}
                   disabled={!product.availableForSale || !selectedVariant?.availableForSale || isCartLoading}
                 >
                   {isCartLoading ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin" />
                   ) : !product.availableForSale ? (
                     'Agotado'
                   ) : (
                     <>
-                      <Banknote className="h-5 w-5" />
-                      Pedir ahora y pagar al recibir
+                      <Banknote className="h-4 w-4 shrink-0" />
+                      Pedir y pagar al recibir
                     </>
                   )}
                 </Button>
@@ -391,42 +391,42 @@ export default function ProductPage() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="w-full min-h-[48px] text-sm font-medium active:scale-[0.97] transition-transform gap-2"
+                  className="w-full min-h-[44px] text-xs font-medium active:scale-[0.97] transition-transform gap-2 sm:min-h-[48px] sm:text-sm"
                   onClick={handleAddToCart}
                   disabled={!product.availableForSale || !selectedVariant?.availableForSale || isCartLoading}
                 >
-                  <ShoppingBag className="h-4 w-4" />
+                  <ShoppingBag className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   Añadir al carrito
                 </Button>
               </div>
 
               {/* Trust icons row */}
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
                 {[
                   { icon: Banknote, text: 'Pago al recibir' },
                   { icon: Truck, text: 'Envío España' },
                   { icon: Phone, text: 'Soporte español' },
-                  { icon: RotateCcw, text: 'Devolución 30 días' },
+                  { icon: RotateCcw, text: 'Devolución 30d' },
                 ].map(({ icon: Icon, text }) => (
-                  <div key={text} className="flex items-center gap-2 rounded-lg border p-2.5">
-                    <Icon className="h-4 w-4 shrink-0 text-accent" />
-                    <span className="text-xs font-medium">{text}</span>
+                  <div key={text} className="flex items-center gap-1.5 rounded-md border p-2 sm:rounded-lg sm:p-2.5">
+                    <Icon className="h-3.5 w-3.5 shrink-0 text-accent sm:h-4 sm:w-4" />
+                    <span className="text-[10px] font-medium sm:text-xs">{text}</span>
                   </div>
                 ))}
               </div>
 
               {/* Why buy COD block */}
-              <div className="rounded-xl border bg-accent/5 p-4 space-y-3">
-                <h3 className="text-sm font-bold">💰 Por qué comprar aquí con Contra Reembolso</h3>
-                <ul className="space-y-2">
+              <div className="rounded-lg border bg-accent/5 p-3 space-y-2 sm:rounded-xl sm:p-4 sm:space-y-3">
+                <h3 className="text-xs font-bold sm:text-sm">💰 Por qué comprar con Contra Reembolso</h3>
+                <ul className="space-y-1.5 sm:space-y-2">
                   {[
-                    'No arriesgas tu dinero pagando por adelantado',
-                    'Recibes el producto, lo verificas y luego pagas',
-                    'Confirmación del pedido por WhatsApp antes del envío',
-                    'Devolución gratuita si no estás satisfecho',
+                    'No arriesgas tu dinero',
+                    'Verificas el producto antes de pagar',
+                    'Confirmación por WhatsApp',
+                    'Devolución gratuita',
                   ].map((text, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+                    <li key={i} className="flex items-start gap-1.5 text-xs text-muted-foreground sm:gap-2 sm:text-sm">
+                      <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent sm:h-4 sm:w-4" />
                       <span>{text}</span>
                     </li>
                   ))}
@@ -546,17 +546,17 @@ export default function ProductPage() {
         )}
       </div>
 
-      {/* Sticky mobile CTA — COD focused */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card/95 p-3 backdrop-blur-md lg:hidden">
-        <div className="mx-auto flex max-w-lg items-center gap-3">
+      {/* Sticky mobile CTA */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card/95 p-2.5 backdrop-blur-md lg:hidden">
+        <div className="mx-auto flex max-w-lg items-center gap-2.5">
           <div className="flex-1 min-w-0">
-            <p className="text-xs text-muted-foreground line-clamp-1">{product.title}</p>
-            <p className={`text-lg font-bold tabular-nums ${hasDiscount ? 'text-destructive' : ''}`}>
+            <p className="text-[10px] text-muted-foreground line-clamp-1">{product.title}</p>
+            <p className={`text-base font-bold tabular-nums ${hasDiscount ? 'text-destructive' : ''}`}>
               {price.toFixed(2)} €
             </p>
           </div>
           <Button
-            className="shrink-0 min-h-[48px] active:scale-[0.97] gap-2 px-5 bg-accent text-accent-foreground hover:bg-accent/90"
+            className="shrink-0 min-h-[44px] active:scale-[0.97] gap-1.5 px-4 text-xs bg-accent text-accent-foreground hover:bg-accent/90"
             onClick={handleBuyNowCOD}
             disabled={!product.availableForSale || !selectedVariant?.availableForSale || isCartLoading}
           >
@@ -564,14 +564,14 @@ export default function ProductPage() {
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <>
-                <Banknote className="h-4 w-4" />
+                <Banknote className="h-3.5 w-3.5" />
                 Pagar al recibir
               </>
             )}
           </Button>
         </div>
       </div>
-      <div className="h-20 lg:hidden" />
+      <div className="h-16 lg:hidden" />
     </Layout>
   );
 }
