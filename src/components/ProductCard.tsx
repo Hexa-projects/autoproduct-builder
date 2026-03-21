@@ -135,13 +135,13 @@ export function ProductCard({ product, isBestSeller }: ProductCardProps) {
 
       {/* Info */}
       <div className="flex flex-1 flex-col p-4">
-        {/* Stock indicator */}
-        <div className="mb-1.5 flex items-center gap-1.5">
-          <div className={`h-1.5 w-1.5 rounded-full ${isAvailable ? (availableVariants.length <= 3 ? 'bg-warning' : 'bg-accent') : 'bg-destructive'}`} />
-          <span className={`text-[11px] font-medium ${!isAvailable ? 'text-destructive' : availableVariants.length <= 3 ? 'text-warning-foreground' : 'text-muted-foreground'}`}>
-            {!isAvailable ? 'Agotado' : availableVariants.length <= 3 ? 'Últimas unidades' : 'En existencias'}
-          </span>
-        </div>
+        {/* Stock indicator - only show when out of stock */}
+        {!isAvailable && (
+          <div className="mb-1.5 flex items-center gap-1.5">
+            <div className="h-1.5 w-1.5 rounded-full bg-destructive" />
+            <span className="text-[11px] font-medium text-destructive">Agotado</span>
+          </div>
+        )}
 
         <h3 className="font-semibold leading-snug text-foreground line-clamp-2 text-sm">{p.title}</h3>
 
