@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ShoppingBag, Loader2, ShoppingCart } from 'lucide-react';
+import { ShoppingBag, Loader2, ShoppingCart, Heart } from 'lucide-react';
 import { useCartStore } from '@/stores/cartStore';
+import { useFavoritesStore } from '@/stores/favoritesStore';
 import { toast } from 'sonner';
 import { trackAddToCart } from '@/lib/tracking';
 import type { ShopifyProduct } from '@/lib/shopify';
@@ -17,6 +18,8 @@ export function ProductCard({ product, isBestSeller }: ProductCardProps) {
   const p = product.node;
   const addItem = useCartStore((s) => s.addItem);
   const isCartLoading = useCartStore((s) => s.isLoading);
+  const toggleFav = useFavoritesStore((s) => s.toggle);
+  const isFav = useFavoritesStore((s) => s.ids.includes(p.handle));
   const [hovering, setHovering] = useState(false);
 
   const price = parseFloat(p.priceRange.minVariantPrice.amount);
@@ -101,6 +104,16 @@ export function ProductCard({ product, isBestSeller }: ProductCardProps) {
             </Badge>
           )}
         </div>
+
+        {/* Favorite heart */}
+        <button
+          type="button"
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleFav(p.handle); }}
+          className="absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-card/80 shadow-sm backdrop-blur-sm transition-transform hover:scale-110 active:scale-95"
+          aria-label={isFav ? 'Quitar de favoritos' : 'Añadir a favoritos'}
+        >
+          <Heart className={`h-4 w-4 transition-colors ${isFav ? 'fill-destructive text-destructive' : 'text-muted-foreground'}`} />
+        </button>
 
         {/* Out of stock */}
         {!isAvailable && (

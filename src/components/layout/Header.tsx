@@ -4,7 +4,8 @@ import { CartDrawer } from '@/components/CartDrawer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
-import { Menu, Search, UserCircle } from 'lucide-react';
+import { Menu, Search, UserCircle, Heart } from 'lucide-react';
+import { useFavoritesStore } from '@/stores/favoritesStore';
 import { supabase } from '@/integrations/supabase/client';
 import logo from '@/assets/logo.png';
 
@@ -56,6 +57,12 @@ export function Header() {
         </form>
 
         <div className="flex items-center gap-1.5 ml-auto sm:gap-2">
+          <Link to="/favoritos">
+            <Button variant="ghost" size="icon" className="relative h-9 w-9" aria-label="Favoritos">
+              <Heart className="h-5 w-5" />
+              <FavBadge />
+            </Button>
+          </Link>
           <Link to={loggedIn ? '/account' : '/account/login'}>
             <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="Mi cuenta">
               <UserCircle className="h-5 w-5" />
@@ -127,5 +134,15 @@ export function Header() {
         </div>
       </nav>
     </header>
+  );
+}
+
+function FavBadge() {
+  const count = useFavoritesStore((s) => s.ids.length);
+  if (count === 0) return null;
+  return (
+    <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">
+      {count > 9 ? '9+' : count}
+    </span>
   );
 }
