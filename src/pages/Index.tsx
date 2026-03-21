@@ -12,7 +12,6 @@ import {
   Banknote, Phone, Package, MessageCircle,
 } from 'lucide-react';
 import bannerDesktop from '@/assets/banner-desktop.png';
-import bannerMobile from '@/assets/banner-mobile.png';
 
 const categoryBlocks = [
   {
