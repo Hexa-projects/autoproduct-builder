@@ -111,11 +111,11 @@ export function CODCheckoutModal({ open, onOpenChange }: CODCheckoutModalProps) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[480px] p-0 gap-0 overflow-hidden max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[480px] p-0 gap-0 overflow-hidden max-h-[90vh] overflow-y-auto rounded-xl">
         <DialogTitle className="sr-only">Formulario de pedido contra reembolso</DialogTitle>
 
-        {/* Shipping badge */}
-        <div className="flex items-center justify-between border-b px-5 py-3">
+        {/* Shipping badge — pr-12 avoids overlap with close X button */}
+        <div className="flex items-center justify-between border-b px-5 pr-12 py-3 bg-muted/30">
           <div className="flex items-center gap-2">
             <div className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-accent">
               <div className="h-2.5 w-2.5 rounded-full bg-accent" />
@@ -133,14 +133,14 @@ export function CODCheckoutModal({ open, onOpenChange }: CODCheckoutModalProps) 
         </div>
 
         {/* Product summary */}
-        <div className="mx-5 mb-3 flex items-center gap-3 rounded-lg border bg-muted/30 p-2.5">
+        <div className="mx-5 mb-3 space-y-2">
           {items.map((item) => {
             const img = item.product.node.images?.edges?.[0]?.node;
             return (
-              <div key={item.variantId} className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md bg-muted">
+              <div key={item.variantId} className="flex items-center gap-3 rounded-lg border bg-muted/30 p-2.5">
+                <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-md bg-muted border">
                   {img && <img src={img.url} alt="" className="h-full w-full object-cover" />}
-                  <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[9px] font-bold text-accent-foreground">
+                  <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-accent-foreground shadow-sm">
                     {item.quantity}
                   </span>
                 </div>
