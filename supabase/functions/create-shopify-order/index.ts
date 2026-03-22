@@ -16,6 +16,10 @@ serve(async (req) => {
       throw new Error('No Shopify access token configured');
     }
 
+    if (SHOPIFY_ACCESS_TOKEN.startsWith('shpss_')) {
+      throw new Error('SHOPIFY_ACCESS_TOKEN is a Shopify API secret key (shpss_), not an Admin API access token. Use the Admin API access token (usually starts with shpat_) with write_orders scope.');
+    }
+
     const SHOP_DOMAIN = 't5mqfi-s1.myshopify.com';
     const API_VERSION = '2025-07';
 
