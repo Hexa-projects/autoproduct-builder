@@ -44,8 +44,8 @@ const codSteps = [
   {
     icon: MessageCircle,
     step: '2',
-    title: 'Confirmamos por WhatsApp',
-    desc: 'Verificamos tu pedido y dirección.',
+    title: 'Procesamos tu pedido',
+    desc: 'Enviamos tu pedido a la transportadora en la misma hora.',
   },
   {
     icon: Banknote,
