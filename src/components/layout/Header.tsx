@@ -39,8 +39,9 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 border-b bg-card/95 backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-2 px-3 sm:gap-4 sm:px-4 sm:h-16">
-        <Link to="/" className="flex shrink-0 items-center">
-          <img src={logo} alt="Revolución Fit" className="h-7 sm:h-10" />
+        <Link to="/" className="flex shrink-0 items-center gap-2">
+          <img src={logo} alt="Revolución Fit" className="h-10 sm:h-14" />
+          <span className="text-base font-bold tracking-tight sm:text-xl">Revolución Fit</span>
         </Link>
 
         {/* Desktop search */}
