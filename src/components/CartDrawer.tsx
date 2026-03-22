@@ -1,26 +1,27 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { ShoppingCart, Minus, Plus, Trash2, Loader2, Banknote, ShieldCheck } from "lucide-react";
+import { ShoppingCart, Minus, Plus, Trash2, Loader2, ExternalLink, ShieldCheck } from "lucide-react";
 import { useCartStore } from "@/stores/cartStore";
 import { trackInitiateCheckout } from "@/lib/tracking";
 
 export function CartDrawer() {
   const [isOpen, setIsOpen] = useState(false);
-  const navigate = useNavigate();
-  const { items, isLoading, isSyncing, updateQuantity, removeItem, syncCart } = useCartStore();
+  const { items, isLoading, isSyncing, updateQuantity, removeItem, getCheckoutUrl, syncCart } = useCartStore();
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = items.reduce((sum, item) => sum + (parseFloat(item.price.amount) * item.quantity), 0);
   const currency = items[0]?.price.currencyCode || 'EUR';
 
   useEffect(() => { if (isOpen) syncCart(); }, [isOpen, syncCart]);
 
-  const handleCODCheckout = () => {
-    trackInitiateCheckout({ value: totalPrice, currency, numItems: totalItems });
-    setIsOpen(false);
-    navigate('/checkout/cod');
+  const handleCheckout = () => {
+    const checkoutUrl = getCheckoutUrl();
+    if (checkoutUrl) {
+      trackInitiateCheckout({ value: totalPrice, currency, numItems: totalItems });
+      window.open(checkoutUrl, '_blank');
+      setIsOpen(false);
+    }
   };
 
   return (
@@ -90,7 +91,7 @@ export function CartDrawer() {
                   <span className="text-xl font-bold tabular-nums">€{totalPrice.toFixed(2)}</span>
                 </div>
                 <Button
-                  onClick={handleCODCheckout}
+                  onClick={handleCheckout}
                   className="w-full gap-2 min-h-[48px] bg-accent text-accent-foreground hover:bg-accent/90"
                   size="lg"
                   disabled={items.length === 0 || isLoading || isSyncing}
@@ -98,12 +99,11 @@ export function CartDrawer() {
                   {isLoading || isSyncing ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
-                    <><Banknote className="w-4 h-4" /> Pedir con Contra Reembolso</>
+                    <><ExternalLink className="w-4 h-4" /> Finalizar compra</>
                   )}
                 </Button>
                 <div className="flex items-center justify-center gap-4 text-[11px] text-muted-foreground">
-                  <span className="flex items-center gap-1"><ShieldCheck className="h-3 w-3" /> Sin cobro online</span>
-                  <span className="flex items-center gap-1"><Banknote className="h-3 w-3" /> Pagas al recibir</span>
+                  <span className="flex items-center gap-1"><ShieldCheck className="h-3 w-3" /> Pago seguro</span>
                 </div>
               </div>
             </>

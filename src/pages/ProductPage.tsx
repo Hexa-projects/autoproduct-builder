@@ -172,7 +172,7 @@ export default function ProductPage() {
       currency,
       quantity: kitCfg.qty,
     });
-    navigate('/checkout/cod');
+    toast.success('Añadido al carrito');
   };
 
   const optionGroups = product.options.filter((o) => o.name !== 'Title' || o.values.length > 1);
