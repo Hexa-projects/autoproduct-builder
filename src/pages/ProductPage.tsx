@@ -496,7 +496,7 @@ export default function ProductPage() {
           <div className="mt-5 grid gap-3 grid-cols-1 sm:grid-cols-3 sm:gap-4">
             {[
               { icon: ShoppingBag, step: '1', title: 'Pides online', desc: 'Haces tu pedido sin tarjeta ni pago adelantado.' },
-              { icon: MessageCircle, step: '2', title: 'Confirmamos por WhatsApp', desc: 'Verificamos tu pedido y dirección antes del envío.' },
+              { icon: MessageCircle, step: '2', title: 'Procesamos tu pedido', desc: 'Enviamos tu pedido a la transportadora en la misma hora.' },
               { icon: Banknote, step: '3', title: 'Recibes y pagas', desc: 'Pagas al repartidor cuando tienes el producto en mano.' },
             ].map((s, i) => (
               <ScrollReveal key={s.step} delay={i * 0.1}>
