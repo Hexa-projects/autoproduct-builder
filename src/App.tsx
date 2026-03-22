@@ -11,6 +11,8 @@ import ProductPage from "./pages/ProductPage";
 import CatalogPage from "./pages/CatalogPage";
 import ContactPage from "./pages/ContactPage";
 import NotFound from "./pages/NotFound";
+import CheckoutPage from "./pages/CheckoutPage";
+import OrderConfirmationPage from "./pages/OrderConfirmationPage";
 import AdminLayout from "./components/admin/AdminLayout";
 import LoginPage from "./pages/admin/LoginPage";
 import DashboardPage from "./pages/admin/DashboardPage";
