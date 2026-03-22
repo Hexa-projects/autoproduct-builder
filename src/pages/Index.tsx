@@ -83,6 +83,7 @@ const whyBuyReasons = [
 const topCODHandles = [
   'rodillera-estabilizadora-de-rotula-1',
   'masajeador-de-rodilla-con-calefactor',
+  'giroscopio-de-mano-para-fortalecer-muneca',
 ];
 
 export default function Index() {
