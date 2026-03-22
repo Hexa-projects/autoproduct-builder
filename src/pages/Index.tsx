@@ -338,7 +338,7 @@ export default function Index() {
         >
           <Link to="/colecciones">
             <Banknote className="h-4 w-4 shrink-0" />
-            Pedir con Contra Reembolso
+            Ver productos
           </Link>
         </Button>
       </div>

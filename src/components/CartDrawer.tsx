@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { ShoppingCart, Minus, Plus, Trash2, Loader2, ExternalLink, ShieldCheck } from "lucide-react";
+import { ShoppingCart, Minus, Plus, Trash2, Loader2, Banknote, ShieldCheck } from "lucide-react";
 import { useCartStore } from "@/stores/cartStore";
 import { trackInitiateCheckout } from "@/lib/tracking";
 
 export function CartDrawer() {
   const [isOpen, setIsOpen] = useState(false);
-  const { items, isLoading, isSyncing, updateQuantity, removeItem, getCheckoutUrl, syncCart } = useCartStore();
+  const navigate = useNavigate();
+  const { items, isLoading, isSyncing, updateQuantity, removeItem, syncCart } = useCartStore();
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = items.reduce((sum, item) => sum + (parseFloat(item.price.amount) * item.quantity), 0);
   const currency = items[0]?.price.currencyCode || 'EUR';
@@ -16,12 +18,9 @@ export function CartDrawer() {
   useEffect(() => { if (isOpen) syncCart(); }, [isOpen, syncCart]);
 
   const handleCheckout = () => {
-    const checkoutUrl = getCheckoutUrl();
-    if (checkoutUrl) {
-      trackInitiateCheckout({ value: totalPrice, currency, numItems: totalItems });
-      window.open(checkoutUrl, '_blank');
-      setIsOpen(false);
-    }
+    trackInitiateCheckout({ value: totalPrice, currency, numItems: totalItems });
+    setIsOpen(false);
+    navigate('/checkout');
   };
 
   return (
@@ -99,7 +98,7 @@ export function CartDrawer() {
                   {isLoading || isSyncing ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
-                    <><ExternalLink className="w-4 h-4" /> Finalizar compra</>
+                    <><Banknote className="w-4 h-4" /> Pagar al recibir</>
                   )}
                 </Button>
                 <div className="flex items-center justify-center gap-4 text-[11px] text-muted-foreground">
