@@ -18,12 +18,9 @@ export function CartDrawer() {
   useEffect(() => { if (isOpen) syncCart(); }, [isOpen, syncCart]);
 
   const handleCheckout = () => {
-    const checkoutUrl = getCheckoutUrl();
-    if (checkoutUrl) {
-      trackInitiateCheckout({ value: totalPrice, currency, numItems: totalItems });
-      window.open(checkoutUrl, '_blank');
-      setIsOpen(false);
-    }
+    trackInitiateCheckout({ value: totalPrice, currency, numItems: totalItems });
+    setIsOpen(false);
+    navigate('/checkout');
   };
 
   return (
