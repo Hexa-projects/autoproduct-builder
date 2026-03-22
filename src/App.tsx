@@ -19,7 +19,7 @@ import ProductFormPage from "./pages/admin/ProductFormPage";
 import CategoriesPage from "./pages/admin/CategoriesPage";
 import ImportPage from "./pages/admin/ImportPage";
 import OrdersPage from "./pages/admin/OrdersPage";
-import CheckoutCODPage from "./pages/CheckoutCODPage";
+
 import AccountLoginPage from "./pages/account/LoginPage";
 import AccountRegisterPage from "./pages/account/RegisterPage";
 import AccountRecoverPage from "./pages/account/RecoverPage";
@@ -47,7 +47,7 @@ function AppContent() {
         <Route path="/colecciones" element={<CatalogPage />} />
         <Route path="/colecciones/:handle" element={<CatalogPage />} />
         <Route path="/contacto" element={<ContactPage />} />
-        <Route path="/checkout/cod" element={<CheckoutCODPage />} />
+        
         <Route path="/favoritos" element={<FavoritesPage />} />
         <Route path="/account/login" element={<AccountLoginPage />} />
         <Route path="/account/register" element={<AccountRegisterPage />} />

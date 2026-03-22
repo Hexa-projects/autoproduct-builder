@@ -3,7 +3,7 @@ import { useShopifyProducts, useShopifyCollections } from '@/hooks/useShopify';
 import { Layout } from '@/components/layout/Layout';
 import { ProductCard } from '@/components/ProductCard';
 import { ScrollReveal } from '@/components/ScrollReveal';
-import { CODFaq } from '@/components/CODFaq';
+
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import {
@@ -328,12 +328,6 @@ export default function Index() {
         </div>
       </section>
 
-      {/* FAQ */}
-      <section className="border-t">
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:py-14">
-          <CODFaq />
-        </div>
-      </section>
 
       {/* Sticky mobile CTA */}
       <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card/95 p-3 backdrop-blur-md lg:hidden">
