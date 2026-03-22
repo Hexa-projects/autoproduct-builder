@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { ShoppingCart, Minus, Plus, Trash2, Loader2, ExternalLink, ShieldCheck } from "lucide-react";
+import { ShoppingCart, Minus, Plus, Trash2, Loader2, Banknote, ShieldCheck } from "lucide-react";
 import { useCartStore } from "@/stores/cartStore";
 import { trackInitiateCheckout } from "@/lib/tracking";
 
