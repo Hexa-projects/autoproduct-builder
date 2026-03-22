@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useShopifyProductByHandle, useShopifyProducts } from '@/hooks/useShopify';
 import { useCartStore } from '@/stores/cartStore';
 import { Layout } from '@/components/layout/Layout';
+import { CODCheckoutModal } from '@/components/CODCheckoutModal';
 import { ProductCard } from '@/components/ProductCard';
 import { ScrollReveal } from '@/components/ScrollReveal';
 import { Button } from '@/components/ui/button';
@@ -46,6 +47,7 @@ export default function ProductPage() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
   const [selectedKit, setSelectedKit] = useState<KitOption>('1x');
+  const [showCheckout, setShowCheckout] = useState(false);
 
   const croContent = useMemo(() => getProductCROContent(slug || ''), [slug]);
 
@@ -172,7 +174,7 @@ export default function ProductPage() {
       currency,
       quantity: kitCfg.qty,
     });
-    navigate('/checkout');
+    setShowCheckout(true);
   };
 
   const optionGroups = product.options.filter((o) => o.name !== 'Title' || o.values.length > 1);
@@ -737,6 +739,7 @@ export default function ProductPage() {
         </div>
       </div>
       <div className="h-16 lg:hidden" />
+      <CODCheckoutModal open={showCheckout} onOpenChange={setShowCheckout} />
     </Layout>
   );
 }
