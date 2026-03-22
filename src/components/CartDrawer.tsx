@@ -98,7 +98,7 @@ export function CartDrawer() {
                   {isLoading || isSyncing ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
-                    <><ExternalLink className="w-4 h-4" /> Finalizar compra</>
+                    <><Banknote className="w-4 h-4" /> Pagar al recibir</>
                   )}
                 </Button>
                 <div className="flex items-center justify-center gap-4 text-[11px] text-muted-foreground">
