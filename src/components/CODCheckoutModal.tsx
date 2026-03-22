@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -7,16 +7,40 @@ import { useCartStore } from '@/stores/cartStore';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import {
-  Loader2, Truck, MapPin, Phone, User, AlertTriangle,
+  Loader2, MapPin, Phone, User, AlertTriangle,
 } from 'lucide-react';
 import { z } from 'zod';
+
+// ── Blocked‑region postal prefixes ──
+const BLOCKED_POSTAL_PREFIXES = ['35', '38', '07', '51', '52'];
+const BLOCKED_KEYWORDS = [
+  'canarias', 'canaria', 'tenerife', 'gran canaria', 'lanzarote',
+  'fuerteventura', 'la palma', 'la gomera', 'el hierro',
+  'baleares', 'balear', 'mallorca', 'menorca', 'ibiza', 'formentera',
+  'ceuta', 'melilla',
+];
+
+function isBlockedRegion(postalCode: string, city: string): boolean {
+  const zip = postalCode.trim();
+  if (BLOCKED_POSTAL_PREFIXES.some((p) => zip.startsWith(p))) return true;
+  const lower = city.toLowerCase();
+  return BLOCKED_KEYWORDS.some((kw) => lower.includes(kw));
+}
 
 const orderSchema = z.object({
   customerName: z.string().trim().min(2, 'Nombre demasiado corto').max(100),
   customerPhone: z.string().trim().min(9, 'Teléfono no válido').max(20),
   address: z.string().trim().min(5, 'Dirección demasiado corta').max(200),
   city: z.string().trim().min(2, 'Ciudad requerida').max(100),
-  postalCode: z.string().trim().min(4, 'Código postal no válido').max(10),
+  postalCode: z
+    .string()
+    .trim()
+    .min(4, 'Código postal no válido')
+    .max(10)
+    .refine(
+      (v) => !BLOCKED_POSTAL_PREFIXES.some((p) => v.startsWith(p)),
+      'No realizamos envíos a esta zona (Canarias, Baleares, Ceuta o Melilla).',
+    ),
 });
 
 type OrderForm = z.infer<typeof orderSchema>;
@@ -24,6 +48,10 @@ type OrderForm = z.infer<typeof orderSchema>;
 interface CODCheckoutModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+}
+
+function generateExternalOrderId(): string {
+  return `lov_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 }
 
 export function CODCheckoutModal({ open, onOpenChange }: CODCheckoutModalProps) {
@@ -38,6 +66,9 @@ export function CODCheckoutModal({ open, onOpenChange }: CODCheckoutModalProps) 
     city: '',
     postalCode: '',
   });
+
+  // Idempotency: keep one external ID per modal open session
+  const externalIdRef = useRef<string>(generateExternalOrderId());
 
   const subtotal = items.reduce((sum, item) => sum + parseFloat(item.price.amount) * item.quantity, 0);
   const shippingCost = 0;
@@ -62,6 +93,14 @@ export function CODCheckoutModal({ open, onOpenChange }: CODCheckoutModalProps) 
       return;
     }
 
+    // Extra client-side blocked-region check on city
+    if (isBlockedRegion(result.data.postalCode, result.data.city)) {
+      toast.error('Zona no disponible', {
+        description: 'Actualmente no realizamos envíos a Canarias, Baleares, Ceuta ni Melilla.',
+      });
+      return;
+    }
+
     if (items.length === 0) {
       toast.error('Tu carrito está vacío');
       return;
@@ -71,36 +110,47 @@ export function CODCheckoutModal({ open, onOpenChange }: CODCheckoutModalProps) 
     try {
       const orderItems = items.map((item) => ({
         title: item.product.node.title,
+        variantId: item.variantId,
         variant: item.selectedOptions.map((o) => o.value).join(' / '),
         quantity: item.quantity,
-        price: parseFloat(item.price.amount),
+        price: item.price.amount,
       }));
 
-      const { data, error } = await supabase.functions.invoke('send-order-telegram', {
+      const { data, error } = await supabase.functions.invoke('create-shopify-order', {
         body: {
           customerName: result.data.customerName,
           customerPhone: result.data.customerPhone,
           address: result.data.address,
           city: result.data.city,
           postalCode: result.data.postalCode,
-          province: result.data.city,
+          province: result.data.city, // fallback
           items: orderItems,
           subtotal,
           shippingCost,
           total,
+          externalOrderId: externalIdRef.current,
         },
       });
 
       if (error) throw error;
       if (!data?.success) throw new Error(data?.error || 'Error al procesar el pedido');
 
+      if (data.duplicate) {
+        toast.info('Este pedido ya fue registrado anteriormente.');
+      }
+
       clearCart();
       onOpenChange(false);
+      // Reset idempotency key for next order
+      externalIdRef.current = generateExternalOrderId();
       navigate('/pedido-confirmado');
-    } catch (err) {
+    } catch (err: any) {
       console.error('Order submission error:', err);
+      const message = err?.message || '';
       toast.error('Error al enviar el pedido', {
-        description: 'Inténtalo de nuevo o contáctanos por teléfono.',
+        description: message.includes('zona') || message.includes('envíos')
+          ? message
+          : 'Inténtalo de nuevo o contáctanos por teléfono.',
       });
     } finally {
       setIsSubmitting(false);
@@ -114,7 +164,7 @@ export function CODCheckoutModal({ open, onOpenChange }: CODCheckoutModalProps) 
       <DialogContent className="sm:max-w-[480px] p-0 gap-0 overflow-hidden max-h-[90vh] overflow-y-auto rounded-xl">
         <DialogTitle className="sr-only">Formulario de pedido contra reembolso</DialogTitle>
 
-        {/* Shipping badge — pr-12 avoids overlap with close X button */}
+        {/* Shipping badge */}
         <div className="flex items-center justify-between border-b px-5 pr-12 py-3 bg-muted/30">
           <div className="flex items-center gap-2">
             <div className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-accent">
@@ -179,7 +229,7 @@ export function CODCheckoutModal({ open, onOpenChange }: CODCheckoutModalProps) 
             {errors.customerPhone && <p className="text-[10px] text-destructive px-1">{errors.customerPhone}</p>}
           </FormRow>
 
-          <FormRow icon={<MapPin className="h-4 w-4 text-muted-foreground" />} label="Dirección de Entrega:" required>
+          <FormRow icon={<MapPin className="h-4 w-4 text-muted-foreground" />} label="Dirección:" required>
             <Input
               value={form.address}
               onChange={(e) => updateField('address', e.target.value)}
