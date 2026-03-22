@@ -9,7 +9,8 @@ import { trackInitiateCheckout } from "@/lib/tracking";
 
 export function CartDrawer() {
   const [isOpen, setIsOpen] = useState(false);
-  const { items, isLoading, isSyncing, updateQuantity, removeItem, getCheckoutUrl, syncCart } = useCartStore();
+  const navigate = useNavigate();
+  const { items, isLoading, isSyncing, updateQuantity, removeItem, syncCart } = useCartStore();
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = items.reduce((sum, item) => sum + (parseFloat(item.price.amount) * item.quantity), 0);
   const currency = items[0]?.price.currencyCode || 'EUR';
