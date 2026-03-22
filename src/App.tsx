@@ -51,6 +51,8 @@ function AppContent() {
         <Route path="/contacto" element={<ContactPage />} />
         
         <Route path="/favoritos" element={<FavoritesPage />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/pedido-confirmado" element={<OrderConfirmationPage />} />
         <Route path="/account/login" element={<AccountLoginPage />} />
         <Route path="/account/register" element={<AccountRegisterPage />} />
         <Route path="/account/recover" element={<AccountRecoverPage />} />
