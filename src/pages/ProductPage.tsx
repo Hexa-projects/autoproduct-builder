@@ -18,6 +18,7 @@ import {
 import { toast } from 'sonner';
 import { trackViewContent, trackAddToCart, trackClickCTACOD, trackSelectKit } from '@/lib/tracking';
 import { getProductCROContent } from '@/lib/productContent';
+import { UrgencyIndicators } from '@/components/UrgencyIndicators';
 
 // ─── FAQ (objection-based) ─────────────────────────────────────────
 const objectionFAQ = [
@@ -296,10 +297,8 @@ export default function ProductPage() {
                 )}
               </div>
 
-              {/* Microcopy COD */}
-              <p className="text-xs text-accent font-semibold sm:text-sm">
-                💶 Haz tu pedido hoy y paga al recibir
-              </p>
+              {/* Urgency indicators */}
+              <UrgencyIndicators productHandle={slug || ''} />
 
               {/* Variant selectors */}
               {optionGroups.map((option) => (
