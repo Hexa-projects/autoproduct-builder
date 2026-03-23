@@ -27,16 +27,43 @@ function isBlockedRegion(postalCode: string, city: string): boolean {
   return BLOCKED_KEYWORDS.some((kw) => lower.includes(kw));
 }
 
+// Spanish phone: +34 or 0034 prefix optional, then 6/7/8/9 + 8 digits
+const SPAIN_PHONE_RE = /^(?:\+34|0034)?[6789]\d{8}$/;
+// Spanish postal code: 5 digits, 01000–52999
+const SPAIN_POSTAL_RE = /^(?:0[1-9]|[1-4]\d|5[0-2])\d{3}$/;
+// Address must contain at least a number (street number)
+const ADDRESS_NUMBER_RE = /\d+/;
+// Name must contain at least two words (first + last)
+const TWO_WORDS_RE = /^\S+\s+\S+/;
+
 const orderSchema = z.object({
-  customerName: z.string().trim().min(2, 'Nombre demasiado corto').max(100),
-  customerPhone: z.string().trim().min(9, 'Teléfono no válido').max(20),
-  address: z.string().trim().min(5, 'Dirección demasiado corta').max(200),
-  city: z.string().trim().min(2, 'Ciudad requerida').max(100),
+  customerName: z
+    .string()
+    .trim()
+    .min(2, 'Nombre demasiado corto')
+    .max(100)
+    .refine((v) => TWO_WORDS_RE.test(v), 'Introduce nombre y apellido.'),
+  customerPhone: z
+    .string()
+    .trim()
+    .transform((v) => v.replace(/[\s\-().]/g, ''))
+    .refine((v) => SPAIN_PHONE_RE.test(v), 'Introduce un teléfono español válido (9 dígitos, ej: 612345678).'),
+  address: z
+    .string()
+    .trim()
+    .min(5, 'Dirección demasiado corta')
+    .max(200)
+    .refine((v) => ADDRESS_NUMBER_RE.test(v), 'La dirección debe incluir número de calle/portal.'),
+  city: z
+    .string()
+    .trim()
+    .min(2, 'Ciudad requerida')
+    .max(100)
+    .refine((v) => /^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s\-'.]+$/.test(v), 'Ciudad no válida. Solo letras.'),
   postalCode: z
     .string()
     .trim()
-    .min(4, 'Código postal no válido')
-    .max(10)
+    .refine((v) => SPAIN_POSTAL_RE.test(v), 'Código postal español no válido (5 dígitos, ej: 28001).')
     .refine(
       (v) => !BLOCKED_POSTAL_PREFIXES.some((p) => v.startsWith(p)),
       'No realizamos envíos a esta zona (Canarias, Baleares, Ceuta o Melilla).',
