@@ -29,7 +29,7 @@ import AccountResetPasswordPage from "./pages/account/ResetPasswordPage";
 import AccountPage from "./pages/account/AccountPage";
 import FavoritesPage from "./pages/FavoritesPage";
 import { SocialProofToast } from "./components/SocialProofToast";
-import { WhatsAppButton } from "./components/WhatsAppButton";
+import { VirtualAssistant } from "./components/VirtualAssistant";
 
 const queryClient = new QueryClient();
 
@@ -46,7 +46,7 @@ function AppContent() {
     <BrowserRouter>
       <TrackingProvider>
       <SocialProofToast />
-      <WhatsAppButton />
+      <VirtualAssistant />
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/products/:slug" element={<ProductPage />} />
