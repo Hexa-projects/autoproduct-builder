@@ -107,6 +107,21 @@ export function trackPageView() {
   }
 }
 
+export function trackPurchase(order: {
+  value: number;
+  currency: string;
+  orderId?: string;
+  numItems: number;
+}) {
+  fbq('Purchase', {
+    value: order.value,
+    currency: order.currency,
+    content_type: 'product',
+    num_items: order.numItems,
+    ...(order.orderId ? { order_id: order.orderId } : {}),
+  });
+}
+
 // ─── Custom CRO events ─────────────────────────────────────────────
 
 export function trackClickCTACOD(product: { id: string; title: string }) {
