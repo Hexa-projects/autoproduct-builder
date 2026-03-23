@@ -179,7 +179,7 @@ async function shopifyAdmin(
 
 // ── Telegram notification (detailed) ───────────────────────────
 
-async function notifyTelegram(order: OrderPayload, shopifyOrderName: string) {
+async function notifyTelegram(order: OrderPayload, shopifyOrderName: string, shopifyFailed = false) {
   try {
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     const TELEGRAM_API_KEY = Deno.env.get('TELEGRAM_API_KEY');
@@ -192,11 +192,18 @@ async function notifyTelegram(order: OrderPayload, shopifyOrderName: string) {
       (item) => `  • ${escapeHtml(item.title)}${item.sku ? ` (${escapeHtml(item.sku)})` : ''} × ${item.quantity} → €${(parseFloat(item.price) * item.quantity).toFixed(2)}`
     ).join('\n');
 
+    const statusEmoji = shopifyFailed ? '⚠️' : '🛒';
+    const statusLabel = shopifyFailed ? 'PEDIDO COD (PENDIENTE SHOPIFY)' : 'NUEVO PEDIDO COD';
+    const shopifyNote = shopifyFailed
+      ? `\n⚠️ <b>ATENCIÓN:</b> No se pudo crear en Shopify. Procesar manualmente.\n`
+      : '';
+
     const msg =
-      `🛒 <b>NUEVO PEDIDO COD</b>\n` +
+      `${statusEmoji} <b>${statusLabel}</b>\n` +
       `━━━━━━━━━━━━━━━━━━\n` +
       `📅 ${now}\n` +
-      `🔖 Pedido: <b>${escapeHtml(shopifyOrderName)}</b>\n\n` +
+      `🔖 Pedido: <b>${escapeHtml(shopifyOrderName)}</b>\n` +
+      `${shopifyNote}\n` +
       `👤 <b>Cliente:</b> ${escapeHtml(order.customerName)}\n` +
       `📞 <b>Teléfono:</b> ${escapeHtml(order.customerPhone)}\n` +
       `${order.customerEmail ? `📧 <b>Email:</b> ${escapeHtml(order.customerEmail)}\n` : ''}` +
@@ -398,9 +405,6 @@ Deno.serve(async (req) => {
       console.error('[shopify] Order creation failed:', JSON.stringify(result.data));
       const errors = result.data?.errors;
       const errorMsg = typeof errors === 'string' ? errors : JSON.stringify(errors);
-      const authHint = isShopifyAuthError(result)
-        ? ' Verifica que el token sea Admin API (shpat_) con scope write_orders.'
-        : '';
       
       // Save failed order to DB for tracking
       await supabase.from('cod_orders').insert({
@@ -419,10 +423,17 @@ Deno.serve(async (req) => {
         status: 'failed',
       });
 
-      return json(
-        { success: false, error: `Error al crear el pedido en Shopify: ${errorMsg}${authHint}` },
-        502,
-      );
+      // ── Send Telegram notification even on Shopify failure ──
+      const fallbackOrderName = `MANUAL-${order.externalOrderId.slice(-8).toUpperCase()}`;
+      console.log(`[shopify] Shopify failed, sending Telegram notification for manual processing: ${fallbackOrderName}`);
+      await notifyTelegram(order, fallbackOrderName, true);
+
+      return json({
+        success: true,
+        shopifyFailed: true,
+        shopifyError: errorMsg,
+        message: 'Pedido registrado y enviado a Telegram para procesamiento manual.',
+      });
     }
 
     const shopifyOrder = result.data.order;
@@ -449,7 +460,7 @@ Deno.serve(async (req) => {
     });
 
     // ── Telegram notification (minimal, non-blocking) ──
-    notifyTelegram(order, shopifyOrderName);
+    await notifyTelegram(order, shopifyOrderName, false);
 
     return json({
       success: true,
