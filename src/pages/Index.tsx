@@ -3,7 +3,6 @@ import { useShopifyProducts, useShopifyCollections } from '@/hooks/useShopify';
 import { Layout } from '@/components/layout/Layout';
 import { ProductCard } from '@/components/ProductCard';
 import { ScrollReveal } from '@/components/ScrollReveal';
-
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,73 +10,32 @@ import {
   Shield, Star, Truck, RotateCcw, ShieldCheck,
   Banknote, Phone, Package, MessageCircle,
 } from 'lucide-react';
+import { trackClickCTAMain } from '@/lib/tracking';
 import bannerDesktop from '@/assets/banner-desktop.png';
 
 const categoryBlocks = [
-  {
-    title: 'Soporte y Postura',
-    desc: 'Fajas, muñequeras y soportes.',
-    icon: Shield,
-    handle: 'soporte-postura',
-  },
-  {
-    title: 'Recuperación',
-    desc: 'Rodillos, bandas y accesorios.',
-    icon: Heart,
-    handle: 'recuperacion',
-  },
-  {
-    title: 'Accesorios Gym',
-    desc: 'Guantes, correas y más.',
-    icon: Dumbbell,
-    handle: 'accesorios',
-  },
+  { title: 'Soporte y Postura', desc: 'Fajas, muñequeras y soportes.', icon: Shield, handle: 'soporte-postura' },
+  { title: 'Recuperación', desc: 'Rodillos, bandas y accesorios.', icon: Heart, handle: 'recuperacion' },
+  { title: 'Accesorios Gym', desc: 'Guantes, correas y más.', icon: Dumbbell, handle: 'accesorios' },
 ];
 
 const codSteps = [
-  {
-    icon: ShoppingBag,
-    step: '1',
-    title: 'Haces tu pedido',
-    desc: 'Sin tarjeta ni pago anticipado.',
-  },
-  {
-    icon: MessageCircle,
-    step: '2',
-    title: 'Procesamos tu pedido',
-    desc: 'Enviamos tu pedido a la transportadora en la misma hora.',
-  },
-  {
-    icon: Banknote,
-    step: '3',
-    title: 'Recibes y pagas',
-    desc: 'Pagas al repartidor en tu domicilio.',
-  },
+  { icon: ShoppingBag, step: '1', title: 'Elige tu producto', desc: 'Sin tarjeta, sin registro. Solo tu dirección.' },
+  { icon: MessageCircle, step: '2', title: 'Confirmamos por WhatsApp', desc: 'Te contactamos para confirmar datos y envío.' },
+  { icon: Banknote, step: '3', title: 'Recibes y pagas', desc: 'Pagas al repartidor en tu domicilio.' },
 ];
 
 const guarantees = [
   { icon: Banknote, text: 'Sin pago anticipado' },
-  { icon: Phone, text: 'Atención en español' },
+  { icon: Phone, text: 'Soporte en español' },
   { icon: RotateCcw, text: 'Devolución 30 días' },
-  { icon: Package, text: 'Seguimiento envío' },
+  { icon: Package, text: 'Seguimiento de envío' },
 ];
 
 const whyBuyReasons = [
-  {
-    icon: ShieldCheck,
-    title: 'Sin riesgo para ti',
-    desc: 'Pagas solo cuando tienes el producto en tus manos.',
-  },
-  {
-    icon: RotateCcw,
-    title: 'Devolución sin excusas',
-    desc: '30 días para devolver gratis.',
-  },
-  {
-    icon: Truck,
-    title: 'Envío rápido España',
-    desc: 'Recíbelo en 2–5 días laborables.',
-  },
+  { icon: ShieldCheck, title: 'Sin riesgo para ti', desc: 'Pagas solo cuando tienes el producto en tus manos.' },
+  { icon: RotateCcw, title: 'Devolución sin excusas', desc: '30 días para devolver gratis.' },
+  { icon: Truck, title: 'Envío rápido España', desc: 'Recíbelo en 2–5 días laborables.' },
 ];
 
 const topCODHandles = [
@@ -91,55 +49,48 @@ export default function Index() {
   const { data: collections } = useShopifyCollections();
 
   const featuredProducts = products?.slice(0, 8) || [];
-  const topCODProducts = products?.filter((p) =>
-    topCODHandles.includes(p.node.handle)
-  ) || [];
+  
+  // Deduplicate: top COD products should not repeat in the "all products" grid
+  const topCODProducts = products?.filter((p) => topCODHandles.includes(p.node.handle)) || [];
+  const topCODIds = new Set(topCODProducts.map(p => p.node.id));
+  const otherProducts = featuredProducts.filter(p => !topCODIds.has(p.node.id));
 
   return (
     <Layout>
-      {/* Hero — horizontal layout */}
+      {/* Hero */}
       <section className="relative overflow-hidden bg-foreground">
         <img
           src={bannerDesktop}
           alt="Revolución Fit — Compra y paga al recibir"
           className="w-full object-cover h-[220px] sm:h-[320px] md:h-[420px] lg:h-[480px]"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent sm:bg-gradient-to-r sm:from-black/75 sm:via-black/40 sm:to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
         <div className="absolute inset-0 flex items-center">
           <div className="w-full px-4 sm:px-8 lg:px-12 max-w-7xl mx-auto">
             <div className="max-w-sm sm:max-w-md">
               <div className="inline-flex items-center gap-1.5 rounded-full bg-accent/20 px-2.5 py-1 text-[10px] font-semibold text-white/90 backdrop-blur-sm mb-2 sm:text-xs sm:mb-3">
                 <Star className="h-3 w-3 fill-warning text-warning" />
-                +500 pedidos entregados en España
+                +500 pedidos entregados con éxito
               </div>
               <h1
-                className="text-white text-base font-bold tracking-tight drop-shadow-lg sm:text-2xl md:text-3xl lg:text-4xl"
+                className="text-white text-lg font-bold tracking-tight drop-shadow-lg sm:text-2xl md:text-3xl lg:text-4xl"
                 style={{ fontFamily: 'Space Grotesk', lineHeight: '1.15' }}
               >
-                Compra hoy y paga al recibir
+                Pide hoy. Paga al recibir.
               </h1>
-              <p className="text-white/80 text-[11px] mt-1 drop-shadow-sm sm:text-sm sm:mt-2 max-w-xs sm:max-w-sm">
-                Sin tarjeta, sin pago anticipado. Confirmamos tu pedido y pagas en casa.
+              <p className="text-white/80 text-xs mt-1.5 drop-shadow-sm sm:text-sm sm:mt-2 max-w-xs sm:max-w-sm">
+                Envío gratis a España peninsular. Sin tarjeta. Pagas al repartidor.
               </p>
-              <div className="flex flex-col gap-2 mt-3 sm:flex-row sm:items-center sm:gap-3 sm:mt-4">
+              <div className="flex flex-col gap-2 mt-3 sm:flex-row sm:items-center sm:gap-3 sm:mt-5">
                 <Button
                   size="lg"
                   asChild
-                  className="shadow-lg text-xs font-semibold active:scale-[0.97] bg-accent text-accent-foreground hover:bg-accent/90 min-h-[42px] gap-2 w-full sm:w-auto sm:text-sm sm:min-h-[48px]"
+                  className="shadow-lg text-xs font-semibold active:scale-[0.97] bg-accent text-accent-foreground hover:bg-accent/90 min-h-[44px] gap-2 w-full sm:w-auto sm:text-sm sm:min-h-[48px]"
+                  onClick={() => trackClickCTAMain('hero')}
                 >
                   <Link to="/colecciones">
                     <Banknote className="h-4 w-4 shrink-0" />
-                    Pedir con Contra Reembolso
-                  </Link>
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  asChild
-                  className="shadow-lg text-xs font-semibold active:scale-[0.97] border-white/50 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20 hover:text-white w-full sm:w-auto sm:text-sm"
-                >
-                  <Link to="/colecciones">
-                    Ver más vendidos <ArrowRight className="h-4 w-4 ml-1 shrink-0" />
+                    Ver productos
                   </Link>
                 </Button>
               </div>
@@ -153,10 +104,10 @@ export default function Index() {
         <div className="mx-auto max-w-7xl px-4 py-8 sm:py-14">
           <ScrollReveal>
             <h2 className="text-center text-xl font-bold tracking-tight sm:text-3xl" style={{ lineHeight: '1.1' }}>
-              Cómo funciona
+              Así de fácil funciona
             </h2>
             <p className="mx-auto mt-1.5 max-w-lg text-center text-xs text-muted-foreground sm:text-sm">
-              Compra sin riesgo en 3 pasos
+              Compra sin riesgo en 3 pasos sencillos
             </p>
           </ScrollReveal>
 
@@ -196,20 +147,20 @@ export default function Index() {
               <div className="text-center">
                 <div className="inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-3 py-1 text-xs font-semibold text-accent mb-2">
                   <Star className="h-3.5 w-3.5" />
-                  Los favoritos
+                  Los más pedidos
                 </div>
                 <h2 className="text-xl font-bold tracking-tight sm:text-3xl" style={{ lineHeight: '1.1' }}>
                   Más vendidos con Pago al Recibir
                 </h2>
                 <p className="mt-1.5 text-xs text-muted-foreground sm:text-sm">
-                  Los más pedidos por nuestros clientes.
+                  Los favoritos de nuestros clientes en España
                 </p>
               </div>
             </ScrollReveal>
-            <div className="mt-6 grid gap-4 grid-cols-2 max-w-2xl mx-auto sm:gap-6">
+            <div className="mt-6 grid gap-4 grid-cols-2 sm:grid-cols-3 max-w-3xl mx-auto sm:gap-6">
               {topCODProducts.map((product, i) => (
                 <ScrollReveal key={product.node.id} delay={i * 0.08}>
-                  <ProductCard product={product} />
+                  <ProductCard product={product} isBestSeller />
                 </ScrollReveal>
               ))}
             </div>
@@ -217,28 +168,49 @@ export default function Index() {
         </section>
       )}
 
-      {/* Todos los productos */}
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:py-14">
-        <ScrollReveal>
-          <div className="flex items-end justify-between gap-2">
-            <div className="min-w-0">
-              <h2 className="text-xl font-bold tracking-tight sm:text-3xl" style={{ lineHeight: '1.1' }}>
-                Todos los productos
-              </h2>
-              <p className="mt-1 text-muted-foreground text-xs sm:text-base">
-                Con pago contra reembolso disponible.
-              </p>
+      {/* Otros productos (sin duplicar los top COD) */}
+      {otherProducts.length > 0 && (
+        <section className="mx-auto max-w-7xl px-4 py-8 sm:py-14">
+          <ScrollReveal>
+            <div className="flex items-end justify-between gap-2">
+              <div className="min-w-0">
+                <h2 className="text-xl font-bold tracking-tight sm:text-3xl" style={{ lineHeight: '1.1' }}>
+                  Más productos
+                </h2>
+                <p className="mt-1 text-muted-foreground text-xs sm:text-base">
+                  Todo con pago contra reembolso disponible
+                </p>
+              </div>
+              <Button variant="outline" asChild className="hidden sm:flex gap-1 text-accent border-accent/30 hover:bg-accent/10 hover:text-accent shrink-0">
+                <Link to="/colecciones">
+                  Ver todo <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
             </div>
-            <Button variant="outline" asChild className="hidden sm:flex gap-1 text-accent border-accent/30 hover:bg-accent/10 hover:text-accent shrink-0">
+          </ScrollReveal>
+
+          <div className="mt-5 grid gap-3 grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
+            {otherProducts.map((product, i) => (
+              <ScrollReveal key={product.node.id} delay={i * 0.04}>
+                <ProductCard product={product} />
+              </ScrollReveal>
+            ))}
+          </div>
+
+          <div className="mt-6 text-center sm:hidden">
+            <Button variant="outline" asChild size="sm" className="text-accent border-accent/30 hover:bg-accent/10 hover:text-accent gap-1">
               <Link to="/colecciones">
-                Ver todo <ArrowRight className="h-4 w-4" />
+                Ver todo el catálogo <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </Button>
           </div>
-        </ScrollReveal>
+        </section>
+      )}
 
-        {isLoading ? (
-          <div className="mt-5 grid gap-3 grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
+      {/* Loading state for all products when no top COD */}
+      {isLoading && topCODProducts.length === 0 && (
+        <section className="mx-auto max-w-7xl px-4 py-8 sm:py-14">
+          <div className="grid gap-3 grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="space-y-2">
                 <Skeleton className="aspect-square w-full rounded-xl" />
@@ -247,29 +219,18 @@ export default function Index() {
               </div>
             ))}
           </div>
-        ) : featuredProducts.length === 0 ? (
+        </section>
+      )}
+
+      {/* Empty state */}
+      {!isLoading && featuredProducts.length === 0 && (
+        <section className="mx-auto max-w-7xl px-4 py-8">
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <ShoppingBag className="h-10 w-10 text-muted-foreground/40" />
             <h3 className="mt-3 text-base font-semibold">No hay productos todavía</h3>
           </div>
-        ) : (
-          <div className="mt-5 grid gap-3 grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
-            {featuredProducts.map((product, i) => (
-              <ScrollReveal key={product.node.id} delay={i * 0.04}>
-                <ProductCard product={product} />
-              </ScrollReveal>
-            ))}
-          </div>
-        )}
-
-        <div className="mt-6 text-center sm:hidden">
-          <Button variant="outline" asChild size="sm" className="text-accent border-accent/30 hover:bg-accent/10 hover:text-accent gap-1">
-            <Link to="/colecciones">
-              Ver todo el catálogo <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          </Button>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Categorías */}
       <section className="border-y bg-card">
@@ -307,7 +268,7 @@ export default function Index() {
         <div className="mx-auto max-w-7xl px-4 py-10 sm:py-20">
           <ScrollReveal>
             <h2 className="text-center text-xl font-bold tracking-tight sm:text-3xl" style={{ lineHeight: '1.1' }}>
-              Por qué Pago Contra Reembolso
+              ¿Por qué Pago Contra Reembolso?
             </h2>
             <p className="mx-auto mt-2 max-w-md text-center text-background/70 text-xs sm:text-base">
               Sin riesgo. Recibes primero, pagas después.
@@ -332,17 +293,17 @@ export default function Index() {
         </div>
       </section>
 
-
       {/* Sticky mobile CTA */}
       <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card/95 p-3 backdrop-blur-md lg:hidden">
         <div className="flex items-center gap-2">
           <div className="flex-1 min-w-0">
-            <p className="text-[10px] text-muted-foreground">🔥 Envío gratis · Pago al recibir</p>
+            <p className="text-[10px] text-muted-foreground">✓ Envío gratis · Pago al recibir</p>
           </div>
           <Button
             size="lg"
             asChild
             className="shrink-0 min-h-[44px] text-xs font-semibold gap-1.5 bg-accent text-accent-foreground hover:bg-accent/90 active:scale-[0.97] px-4"
+            onClick={() => trackClickCTAMain('sticky_mobile')}
           >
             <Link to="/colecciones">
               <Banknote className="h-3.5 w-3.5 shrink-0" />

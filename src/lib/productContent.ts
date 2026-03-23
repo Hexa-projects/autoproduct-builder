@@ -4,19 +4,12 @@
  */
 
 export interface ProductCROContent {
-  /** Benefit-oriented headline (replaces raw title) */
   headline: string;
-  /** Short value proposition subtitle */
   subtitle: string;
-  /** 4–6 benefit bullets */
   benefits: string[];
-  /** What's included */
   includes: string[];
-  /** How to use steps */
   howToUse: string[];
-  /** Comparison table rows: [criteria, ours, generic] */
   comparison: [string, string, string][];
-  /** Social proof / testimonials */
   testimonials: { name: string; text: string; rating: number }[];
 }
 
@@ -50,9 +43,9 @@ const rodilleraContent: ProductCROContent = {
     ['Pago contra reembolso', '✓ Pagas al recibir', '✗ Solo online'],
   ],
   testimonials: [
-    { name: 'Carmen L.', text: 'La uso para caminar y noto mucha diferencia. Al principio dudé por el pago online, pero con contra reembolso me animé.', rating: 5 },
-    { name: 'Javier M.', text: 'Muy buen ajuste, no se mueve al subir escaleras. Me confirmaron el pedido por WhatsApp en menos de 2 horas.', rating: 5 },
-    { name: 'Ana R.', text: 'Ligera y cómoda. La llevo debajo del pantalón y nadie la nota. Envío rápido.', rating: 4 },
+    { name: 'Carmen L. · Madrid', text: 'La uso para caminar y noto mucha diferencia. Con contra reembolso me animé sin dudar.', rating: 5 },
+    { name: 'Javier M. · Barcelona', text: 'Buen ajuste, no se mueve al subir escaleras. Me confirmaron por WhatsApp en 2 horas.', rating: 5 },
+    { name: 'Ana R. · Valencia', text: 'Ligera y cómoda. La llevo debajo del pantalón y nadie la nota. Envío en 3 días.', rating: 4 },
   ],
 };
 
@@ -88,9 +81,46 @@ const masajeadorContent: ProductCROContent = {
     ['Pago contra reembolso', '✓ Pagas al recibir', '✗ Solo online'],
   ],
   testimonials: [
-    { name: 'Miguel Á.', text: 'Lo uso antes de dormir y noto la rodilla mucho más relajada. El calor es muy agradable.', rating: 5 },
-    { name: 'Lucía P.', text: 'Me encanta poder usarlo sin cables. Lo llevo al sofá o a la cama. Muy práctico.', rating: 5 },
-    { name: 'Fernando S.', text: 'Lo compré con pago al recibir porque no quería arriesgar. Llegó en 3 días y funciona perfecto.', rating: 4 },
+    { name: 'Miguel Á. · Sevilla', text: 'Lo uso antes de dormir y noto la rodilla más relajada. El calor es muy agradable.', rating: 5 },
+    { name: 'Lucía P. · Málaga', text: 'Me encanta poder usarlo sin cables. Lo llevo al sofá o a la cama. Muy práctico.', rating: 5 },
+    { name: 'Fernando S. · Zaragoza', text: 'Llegó en 3 días y funciona perfecto. Con pago al recibir no tenía nada que perder.', rating: 4 },
+  ],
+};
+
+const giroscopioContent: ProductCROContent = {
+  headline: 'Fortalece tu muñeca y antebrazo en minutos al día',
+  subtitle: 'Giroscopio de mano para rehabilitación, fuerza y prevención de lesiones.',
+  benefits: [
+    'Fortalece muñeca, antebrazo y dedos de forma progresiva',
+    'Ideal para rehabilitación del túnel carpiano y tendinitis',
+    'Sin pilas ni cables — funciona por inercia giroscópica',
+    'Compacto y portátil — úsalo en casa, oficina o viaje',
+    'Mejora agarre y resistencia para deportes de raqueta o escalada',
+    'Pantalla LED integrada con contador de RPM',
+  ],
+  includes: [
+    '1× Giroscopio de mano profesional',
+    'Cuerda de arranque',
+    'Manual de uso en español',
+  ],
+  howToUse: [
+    'Enrolla la cuerda de arranque en la ranura del giroscopio.',
+    'Tira de la cuerda con un movimiento firme para activar el giro.',
+    'Rota la muñeca de forma circular para mantener y aumentar la velocidad.',
+    'Empieza con 2-3 minutos al día e incrementa progresivamente.',
+  ],
+  comparison: [
+    ['Fortalecimiento progresivo', '✓ Resistencia variable', '✗ Peso fijo'],
+    ['Rehabilitación', '✓ Recomendado por fisios', '✗ Uso limitado'],
+    ['Portabilidad', '✓ Cabe en el bolsillo', '✗ Equipamiento pesado'],
+    ['Sin electricidad', '✓ Funciona por inercia', '✗ Necesita pilas'],
+    ['Soporte postventa', '✓ WhatsApp directo', '✗ Sin soporte'],
+    ['Pago contra reembolso', '✓ Pagas al recibir', '✗ Solo online'],
+  ],
+  testimonials: [
+    { name: 'Carlos D. · Madrid', text: 'Tenía dolor de muñeca por el ordenador. En 2 semanas notaba mejoría clara. Muy recomendable.', rating: 5 },
+    { name: 'Marta J. · Bilbao', text: 'Lo uso en la oficina. Es silencioso y entretenido. Mi agarre ha mejorado mucho.', rating: 5 },
+    { name: 'Pedro R. · Alicante', text: 'Llegó rápido y pagué al repartidor. Funciona muy bien para calentar antes de escalar.', rating: 4 },
   ],
 };
 
@@ -122,6 +152,7 @@ const genericContent: ProductCROContent = {
 const contentMap: Record<string, ProductCROContent> = {
   'rodillera-estabilizadora-de-rotula-1': rodilleraContent,
   'masajeador-de-rodilla-con-calefactor': masajeadorContent,
+  'giroscopio-de-mano-para-fortalecer-muneca': giroscopioContent,
 };
 
 export function getProductCROContent(handle: string): ProductCROContent {
