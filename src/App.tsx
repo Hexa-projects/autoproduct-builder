@@ -46,7 +46,7 @@ function AppContent() {
     <BrowserRouter>
       <TrackingProvider>
       <SocialProofToast />
-      <WhatsAppButton />
+      <VirtualAssistant />
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/products/:slug" element={<ProductPage />} />
