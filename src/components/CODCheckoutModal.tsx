@@ -182,6 +182,14 @@ export function CODCheckoutModal({ open, onOpenChange }: CODCheckoutModalProps) 
         toast.info('Este pedido ya fue registrado anteriormente.');
       }
 
+      // Store order data for Purchase pixel event
+      sessionStorage.setItem('rf_last_order', JSON.stringify({
+        total,
+        currency: 'EUR',
+        orderId: externalIdRef.current,
+        numItems: items.reduce((s, i) => s + i.quantity, 0),
+      }));
+
       clearCart();
       onOpenChange(false);
       externalIdRef.current = generateExternalOrderId();

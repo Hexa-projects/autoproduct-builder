@@ -1,10 +1,31 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, ShoppingBag, Phone, Truck } from 'lucide-react';
 import { ScrollReveal } from '@/components/ScrollReveal';
+import { trackPurchase } from '@/lib/tracking';
 
 export default function OrderConfirmationPage() {
+  useEffect(() => {
+    // Fire test Purchase event for Meta Pixel conversion
+    const stored = sessionStorage.getItem('rf_last_order');
+    if (stored) {
+      try {
+        const order = JSON.parse(stored);
+        trackPurchase({
+          value: order.total ?? 0,
+          currency: order.currency ?? 'EUR',
+          orderId: order.orderId,
+          numItems: order.numItems ?? 1,
+        });
+        sessionStorage.removeItem('rf_last_order');
+      } catch { /* ignore */ }
+    } else {
+      // Fallback: fire a test event
+      trackPurchase({ value: 0, currency: 'EUR', numItems: 0 });
+    }
+  }, []);
   return (
     <Layout>
       <div className="mx-auto max-w-lg px-4 py-16 text-center sm:py-24">
