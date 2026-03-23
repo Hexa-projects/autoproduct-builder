@@ -43,7 +43,7 @@ function fbq(eventName: string, params?: Record<string, unknown>) {
   if (typeof pixel !== 'function') return;
 
   const eventId = uid();
-  pixel('track', eventName, { ...params, eventID: eventId });
+  pixel('track', eventName, params ?? {}, { eventID: eventId });
 }
 
 function fbqCustom(eventName: string, params?: Record<string, unknown>) {
@@ -52,7 +52,7 @@ function fbqCustom(eventName: string, params?: Record<string, unknown>) {
   if (typeof pixel !== 'function') return;
 
   const eventId = uid();
-  pixel('trackCustom', eventName, { ...params, eventID: eventId });
+  pixel('trackCustom', eventName, params ?? {}, { eventID: eventId });
 }
 
 // ─── Standard events ────────────────────────────────────────────────
