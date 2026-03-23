@@ -212,7 +212,7 @@ export function CODCheckoutModal({ open, onOpenChange }: CODCheckoutModalProps) 
   if (items.length === 0) return null;
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) return; onOpenChange(v); }}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[480px] p-0 gap-0 overflow-hidden max-h-[90vh] overflow-y-auto rounded-xl" onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
         <DialogTitle className="sr-only">Formulario de pedido contra reembolso</DialogTitle>
 
