@@ -368,7 +368,7 @@ Deno.serve(async (req) => {
     });
 
     // ── Telegram notification (minimal, non-blocking) ──
-    notifyTelegram(shopifyOrderName, order.total, order.customerName);
+    notifyTelegram(order, shopifyOrderName);
 
     return json({
       success: true,
