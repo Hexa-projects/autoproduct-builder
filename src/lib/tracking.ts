@@ -140,6 +140,37 @@ export function trackSelectKit(kit: '1x' | '2x' | '3x', product: { id: string; t
   });
 }
 
+// ─── COD Form funnel events ────────────────────────────────────────
+
+export function trackCODFormStart() {
+  fbqCustom('COD_Form_Start');
+}
+
+export function trackCODFormSubmit(order: { value: number; currency: string; numItems: number }) {
+  fbqCustom('COD_Form_Submit', {
+    value: order.value,
+    currency: order.currency,
+    num_items: order.numItems,
+  });
+}
+
+export function trackCODFormError(errorFields: string[]) {
+  fbqCustom('COD_Form_Error', {
+    error_fields: errorFields.join(','),
+  });
+}
+
+export function trackCODFormAbandon(filledFields: string[]) {
+  fbqCustom('COD_Form_Abandon', {
+    filled_fields: filledFields.join(','),
+    fields_count: filledFields.length,
+  });
+}
+
+export function trackClickCTAMain(location: string) {
+  fbqCustom('Click_CTA_Main', { location });
+}
+
 // ─── Auth events ────────────────────────────────────────────────────
 
 export function trackAuthEvent(event: string) {
