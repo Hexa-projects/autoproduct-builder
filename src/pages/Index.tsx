@@ -108,6 +108,10 @@ export default function Index() {
         <div className="absolute inset-0 flex items-center">
           <div className="w-full px-4 sm:px-8 lg:px-12 max-w-7xl mx-auto">
             <div className="max-w-sm sm:max-w-md">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-accent/20 px-2.5 py-1 text-[10px] font-semibold text-white/90 backdrop-blur-sm mb-2 sm:text-xs sm:mb-3">
+                <Star className="h-3 w-3 fill-warning text-warning" />
+                +500 pedidos entregados en España
+              </div>
               <h1
                 className="text-white text-base font-bold tracking-tight drop-shadow-lg sm:text-2xl md:text-3xl lg:text-4xl"
                 style={{ fontFamily: 'Space Grotesk', lineHeight: '1.15' }}
@@ -331,16 +335,21 @@ export default function Index() {
 
       {/* Sticky mobile CTA */}
       <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card/95 p-3 backdrop-blur-md lg:hidden">
-        <Button
-          size="lg"
-          asChild
-          className="w-full min-h-[48px] text-sm font-semibold gap-2 bg-accent text-accent-foreground hover:bg-accent/90 active:scale-[0.97]"
-        >
-          <Link to="/colecciones">
-            <Banknote className="h-4 w-4 shrink-0" />
-            Ver productos
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] text-muted-foreground">🔥 Envío gratis · Pago al recibir</p>
+          </div>
+          <Button
+            size="lg"
+            asChild
+            className="shrink-0 min-h-[44px] text-xs font-semibold gap-1.5 bg-accent text-accent-foreground hover:bg-accent/90 active:scale-[0.97] px-4"
+          >
+            <Link to="/colecciones">
+              <Banknote className="h-3.5 w-3.5 shrink-0" />
+              Pedir ahora
+            </Link>
+          </Button>
+        </div>
       </div>
       <div className="h-[60px] lg:hidden" />
     </Layout>
