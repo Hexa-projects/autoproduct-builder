@@ -7,7 +7,7 @@ import { useCartStore } from '@/stores/cartStore';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import {
-  Loader2, MapPin, Phone, User, AlertTriangle,
+  Loader2, MapPin, Phone, User, Mail, AlertTriangle, Building,
 } from 'lucide-react';
 import { z } from 'zod';
 
@@ -20,10 +20,10 @@ const BLOCKED_KEYWORDS = [
   'ceuta', 'melilla',
 ];
 
-function isBlockedRegion(postalCode: string, city: string): boolean {
+function isBlockedRegion(postalCode: string, city: string, province: string): boolean {
   const zip = postalCode.trim();
   if (BLOCKED_POSTAL_PREFIXES.some((p) => zip.startsWith(p))) return true;
-  const lower = city.toLowerCase();
+  const lower = `${city} ${province}`.toLowerCase();
   return BLOCKED_KEYWORDS.some((kw) => lower.includes(kw));
 }
 
@@ -35,6 +35,8 @@ const SPAIN_POSTAL_RE = /^(?:0[1-9]|[1-4]\d|5[0-2])\d{3}$/;
 const ADDRESS_NUMBER_RE = /\d+/;
 // Name must contain at least two words (first + last)
 const TWO_WORDS_RE = /^\S+\s+\S+/;
+// Letters only (including Spanish chars)
+const LETTERS_ONLY_RE = /^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑàèìòùÀÈÌÒÙ\s\-'.]+$/;
 
 const orderSchema = z.object({
   customerName: z
@@ -48,6 +50,13 @@ const orderSchema = z.object({
     .trim()
     .transform((v) => v.replace(/[\s\-().]/g, ''))
     .refine((v) => SPAIN_PHONE_RE.test(v), 'Introduce un teléfono español válido (9 dígitos, ej: 612345678).'),
+  customerEmail: z
+    .string()
+    .trim()
+    .email('Email no válido.')
+    .max(255)
+    .optional()
+    .or(z.literal('')),
   address: z
     .string()
     .trim()
@@ -59,7 +68,7 @@ const orderSchema = z.object({
     .trim()
     .min(2, 'Ciudad requerida')
     .max(100)
-    .refine((v) => /^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s\-'.]+$/.test(v), 'Ciudad no válida. Solo letras.'),
+    .refine((v) => LETTERS_ONLY_RE.test(v), 'Ciudad no válida. Solo letras.'),
   postalCode: z
     .string()
     .trim()
@@ -68,6 +77,12 @@ const orderSchema = z.object({
       (v) => !BLOCKED_POSTAL_PREFIXES.some((p) => v.startsWith(p)),
       'No realizamos envíos a esta zona (Canarias, Baleares, Ceuta o Melilla).',
     ),
+  province: z
+    .string()
+    .trim()
+    .min(2, 'Provincia requerida')
+    .max(100)
+    .refine((v) => LETTERS_ONLY_RE.test(v), 'Provincia no válida. Solo letras.'),
 });
 
 type OrderForm = z.infer<typeof orderSchema>;
@@ -89,12 +104,13 @@ export function CODCheckoutModal({ open, onOpenChange }: CODCheckoutModalProps) 
   const [form, setForm] = useState<OrderForm>({
     customerName: '',
     customerPhone: '',
+    customerEmail: '',
     address: '',
     city: '',
     postalCode: '',
+    province: '',
   });
 
-  // Idempotency: keep one external ID per modal open session
   const externalIdRef = useRef<string>(generateExternalOrderId());
 
   const subtotal = items.reduce((sum, item) => sum + parseFloat(item.price.amount) * item.quantity, 0);
@@ -120,8 +136,7 @@ export function CODCheckoutModal({ open, onOpenChange }: CODCheckoutModalProps) 
       return;
     }
 
-    // Extra client-side blocked-region check on city
-    if (isBlockedRegion(result.data.postalCode, result.data.city)) {
+    if (isBlockedRegion(result.data.postalCode, result.data.city, result.data.province)) {
       toast.error('Zona no disponible', {
         description: 'Actualmente no realizamos envíos a Canarias, Baleares, Ceuta ni Melilla.',
       });
@@ -147,10 +162,11 @@ export function CODCheckoutModal({ open, onOpenChange }: CODCheckoutModalProps) 
         body: {
           customerName: result.data.customerName,
           customerPhone: result.data.customerPhone,
+          customerEmail: result.data.customerEmail || undefined,
           address: result.data.address,
           city: result.data.city,
           postalCode: result.data.postalCode,
-          province: result.data.city, // fallback
+          province: result.data.province,
           items: orderItems,
           subtotal,
           shippingCost,
@@ -168,7 +184,6 @@ export function CODCheckoutModal({ open, onOpenChange }: CODCheckoutModalProps) 
 
       clearCart();
       onOpenChange(false);
-      // Reset idempotency key for next order
       externalIdRef.current = generateExternalOrderId();
       navigate('/pedido-confirmado');
     } catch (err: any) {
@@ -239,7 +254,7 @@ export function CODCheckoutModal({ open, onOpenChange }: CODCheckoutModalProps) 
             <Input
               value={form.customerName}
               onChange={(e) => updateField('customerName', e.target.value)}
-              placeholder="Nombre Completo"
+              placeholder="Nombre y Apellido"
               className={`border-0 bg-transparent shadow-none focus-visible:ring-0 h-9 text-sm ${errors.customerName ? 'placeholder:text-destructive' : ''}`}
             />
             {errors.customerName && <p className="text-[10px] text-destructive px-1">{errors.customerName}</p>}
@@ -250,13 +265,24 @@ export function CODCheckoutModal({ open, onOpenChange }: CODCheckoutModalProps) 
               type="tel"
               value={form.customerPhone}
               onChange={(e) => updateField('customerPhone', e.target.value)}
-              placeholder="Teléfono"
+              placeholder="612 345 678"
               className={`border-0 bg-transparent shadow-none focus-visible:ring-0 h-9 text-sm ${errors.customerPhone ? 'placeholder:text-destructive' : ''}`}
             />
             {errors.customerPhone && <p className="text-[10px] text-destructive px-1">{errors.customerPhone}</p>}
           </FormRow>
 
-          <FormRow icon={<MapPin className="h-4 w-4 text-muted-foreground" />} label="Dirección:" required>
+          <FormRow icon={<Mail className="h-4 w-4 text-muted-foreground" />} label="Email">
+            <Input
+              type="email"
+              value={form.customerEmail}
+              onChange={(e) => updateField('customerEmail', e.target.value)}
+              placeholder="email@ejemplo.com (opcional)"
+              className={`border-0 bg-transparent shadow-none focus-visible:ring-0 h-9 text-sm ${errors.customerEmail ? 'placeholder:text-destructive' : ''}`}
+            />
+            {errors.customerEmail && <p className="text-[10px] text-destructive px-1">{errors.customerEmail}</p>}
+          </FormRow>
+
+          <FormRow icon={<MapPin className="h-4 w-4 text-muted-foreground" />} label="Dirección" required>
             <Input
               value={form.address}
               onChange={(e) => updateField('address', e.target.value)}
@@ -266,24 +292,36 @@ export function CODCheckoutModal({ open, onOpenChange }: CODCheckoutModalProps) 
             {errors.address && <p className="text-[10px] text-destructive px-1">{errors.address}</p>}
           </FormRow>
 
-          <FormRow icon={<MapPin className="h-4 w-4 text-muted-foreground" />} label="Ciudad" required>
-            <Input
-              value={form.city}
-              onChange={(e) => updateField('city', e.target.value)}
-              placeholder="Ciudad"
-              className={`border-0 bg-transparent shadow-none focus-visible:ring-0 h-9 text-sm ${errors.city ? 'placeholder:text-destructive' : ''}`}
-            />
-            {errors.city && <p className="text-[10px] text-destructive px-1">{errors.city}</p>}
-          </FormRow>
+          <div className="grid grid-cols-2 gap-3">
+            <FormRow icon={<Building className="h-4 w-4 text-muted-foreground" />} label="Ciudad" required>
+              <Input
+                value={form.city}
+                onChange={(e) => updateField('city', e.target.value)}
+                placeholder="Ciudad"
+                className={`border-0 bg-transparent shadow-none focus-visible:ring-0 h-9 text-sm ${errors.city ? 'placeholder:text-destructive' : ''}`}
+              />
+              {errors.city && <p className="text-[10px] text-destructive px-1">{errors.city}</p>}
+            </FormRow>
 
-          <FormRow icon={<MapPin className="h-4 w-4 text-muted-foreground" />} label="Código Postal" required>
+            <FormRow icon={<MapPin className="h-4 w-4 text-muted-foreground" />} label="C. Postal" required>
+              <Input
+                value={form.postalCode}
+                onChange={(e) => updateField('postalCode', e.target.value)}
+                placeholder="28001"
+                className={`border-0 bg-transparent shadow-none focus-visible:ring-0 h-9 text-sm ${errors.postalCode ? 'placeholder:text-destructive' : ''}`}
+              />
+              {errors.postalCode && <p className="text-[10px] text-destructive px-1">{errors.postalCode}</p>}
+            </FormRow>
+          </div>
+
+          <FormRow icon={<MapPin className="h-4 w-4 text-muted-foreground" />} label="Provincia" required>
             <Input
-              value={form.postalCode}
-              onChange={(e) => updateField('postalCode', e.target.value)}
-              placeholder="Código Postal"
-              className={`border-0 bg-transparent shadow-none focus-visible:ring-0 h-9 text-sm ${errors.postalCode ? 'placeholder:text-destructive' : ''}`}
+              value={form.province}
+              onChange={(e) => updateField('province', e.target.value)}
+              placeholder="Provincia"
+              className={`border-0 bg-transparent shadow-none focus-visible:ring-0 h-9 text-sm ${errors.province ? 'placeholder:text-destructive' : ''}`}
             />
-            {errors.postalCode && <p className="text-[10px] text-destructive px-1">{errors.postalCode}</p>}
+            {errors.province && <p className="text-[10px] text-destructive px-1">{errors.province}</p>}
           </FormRow>
 
           {/* Warning */}
@@ -330,7 +368,9 @@ function FormRow({ icon, label, required, children }: {
         </div>
         <div className="flex flex-1 items-center gap-2 rounded-lg border bg-background px-3">
           {icon}
-          {children}
+          <div className="flex-1">
+            {children}
+          </div>
         </div>
       </div>
     </div>

@@ -131,20 +131,41 @@ async function shopifyAdmin(
   throw new Error(`Shopify API failed after ${retries} retries: ${JSON.stringify(lastError)}`);
 }
 
-// ── Telegram notification (optional, minimal info) ─────────────
+// ── Telegram notification (detailed) ───────────────────────────
 
-async function notifyTelegram(orderName: string, total: number, customerName: string) {
+async function notifyTelegram(order: OrderPayload, shopifyOrderName: string) {
   try {
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     const TELEGRAM_API_KEY = Deno.env.get('TELEGRAM_API_KEY');
     const CHAT_ID = Deno.env.get('TELEGRAM_CHAT_ID');
     if (!LOVABLE_API_KEY || !TELEGRAM_API_KEY || !CHAT_ID) return;
 
+    const now = new Date().toLocaleString('es-ES', { timeZone: 'Europe/Madrid' });
+
+    const itemLines = order.items.map(
+      (item) => `  • ${escapeHtml(item.title)}${item.sku ? ` (${escapeHtml(item.sku)})` : ''} × ${item.quantity} → €${(parseFloat(item.price) * item.quantity).toFixed(2)}`
+    ).join('\n');
+
     const msg =
-      `✅ <b>Nuevo pedido creado en Shopify</b>\n` +
-      `Pedido: <b>${escapeHtml(orderName)}</b>\n` +
-      `Cliente: ${escapeHtml(customerName)}\n` +
-      `Total: €${total.toFixed(2)}\n` +
+      `🛒 <b>NUEVO PEDIDO COD</b>\n` +
+      `━━━━━━━━━━━━━━━━━━\n` +
+      `📅 ${now}\n` +
+      `🔖 Pedido: <b>${escapeHtml(shopifyOrderName)}</b>\n\n` +
+      `👤 <b>Cliente:</b> ${escapeHtml(order.customerName)}\n` +
+      `📞 <b>Teléfono:</b> ${escapeHtml(order.customerPhone)}\n` +
+      `${order.customerEmail ? `📧 <b>Email:</b> ${escapeHtml(order.customerEmail)}\n` : ''}` +
+      `\n📦 <b>Dirección de envío:</b>\n` +
+      `${escapeHtml(order.address)}\n` +
+      `${escapeHtml(order.postalCode)} ${escapeHtml(order.city)}\n` +
+      `${escapeHtml(order.province)}, España\n\n` +
+      `🛍️ <b>Productos:</b>\n${itemLines}\n\n` +
+      `━━━━━━━━━━━━━━━━━━\n` +
+      `💰 Subtotal: €${order.subtotal.toFixed(2)}\n` +
+      `🚚 Envío: ${order.shippingCost === 0 ? 'GRATIS' : `€${order.shippingCost.toFixed(2)}`}\n` +
+      `<b>💶 TOTAL A COBRAR: €${order.total.toFixed(2)}</b>\n` +
+      `━━━━━━━━━━━━━━━━━━\n` +
+      `💳 Método: <b>Contrareembolso (COD)</b>\n` +
+      `${order.notes ? `📝 <b>Notas:</b> ${escapeHtml(order.notes)}\n` : ''}` +
       `🔗 <a href="https://${SHOPIFY_DOMAIN}/admin/orders">Ver en Shopify</a>`;
 
     await fetch('https://connector-gateway.lovable.dev/telegram/sendMessage', {
