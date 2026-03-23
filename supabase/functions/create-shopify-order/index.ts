@@ -81,6 +81,52 @@ async function sleep(ms: number) {
 const SHOPIFY_DOMAIN = 't5mqfi-s1.myshopify.com';
 const API_VERSION = '2025-07';
 
+type ShopifyTokenCandidate = {
+  token: string;
+  source: string;
+};
+
+function getShopifyTokenCandidates(): ShopifyTokenCandidate[] {
+  const candidates: ShopifyTokenCandidate[] = [];
+  const seenTokens = new Set<string>();
+
+  const pushCandidate = (token: string | undefined, source: string) => {
+    const normalized = token?.trim();
+    if (!normalized || seenTokens.has(normalized)) return;
+    seenTokens.add(normalized);
+    candidates.push({ token: normalized, source });
+  };
+
+  // Preferred: explicit Admin API token
+  pushCandidate(Deno.env.get('SHOPIFY_ACCESS_TOKEN'), 'SHOPIFY_ACCESS_TOKEN');
+
+  // Fallback: user-scoped online access tokens (connector-managed)
+  const envVars = Deno.env.toObject();
+  for (const [key, value] of Object.entries(envVars)) {
+    if (key.startsWith('SHOPIFY_ONLINE_ACCESS_TOKEN:user:')) {
+      pushCandidate(value, key);
+    }
+  }
+
+  return candidates;
+}
+
+function isShopifyAuthError(result: { status: number; data: any }): boolean {
+  if (result.status === 401 || result.status === 403) return true;
+
+  const errors = result.data?.errors;
+  if (typeof errors === 'string') {
+    const normalized = errors.toLowerCase();
+    return (
+      normalized.includes('invalid api key') ||
+      normalized.includes('access token') ||
+      normalized.includes('wrong password')
+    );
+  }
+
+  return false;
+}
+
 async function shopifyAdmin(
   path: string,
   method: string,
@@ -197,8 +243,15 @@ Deno.serve(async (req) => {
 
   try {
     // ── Env vars ──
-    const SHOPIFY_ACCESS_TOKEN = Deno.env.get('SHOPIFY_ACCESS_TOKEN');
-    if (!SHOPIFY_ACCESS_TOKEN) throw new Error('SHOPIFY_ACCESS_TOKEN not configured');
+    const shopifyTokenCandidates = getShopifyTokenCandidates();
+    if (!shopifyTokenCandidates.length) {
+      throw new Error('No Shopify Admin token configured. Set SHOPIFY_ACCESS_TOKEN (Admin API token shpat_) or reconnect Shopify.');
+    }
+
+    const configuredAdminToken = Deno.env.get('SHOPIFY_ACCESS_TOKEN')?.trim();
+    if (configuredAdminToken && !configuredAdminToken.startsWith('shpat_')) {
+      console.warn('[shopify] SHOPIFY_ACCESS_TOKEN does not start with shpat_. It may be invalid for Admin API orders.');
+    }
 
     const order: OrderPayload = await req.json();
 
@@ -313,13 +366,41 @@ Deno.serve(async (req) => {
       total: order.total,
     });
 
-    // ── Create order in Shopify ──
-    const result = await shopifyAdmin('/orders.json', 'POST', shopifyPayload, SHOPIFY_ACCESS_TOKEN);
+    // ── Create order in Shopify (try available tokens) ──
+    let result: { ok: boolean; status: number; data: any } | null = null;
+    let tokenSourceUsed = '';
+
+    for (const candidate of shopifyTokenCandidates) {
+      console.log(`[shopify] Creating order using token source: ${candidate.source}`);
+      const attempt = await shopifyAdmin('/orders.json', 'POST', shopifyPayload, candidate.token);
+
+      if (attempt.ok) {
+        result = attempt;
+        tokenSourceUsed = candidate.source;
+        break;
+      }
+
+      result = attempt;
+
+      if (isShopifyAuthError(attempt)) {
+        console.warn(`[shopify] Auth failed with ${candidate.source}, trying next token if available.`);
+        continue;
+      }
+
+      break;
+    }
+
+    if (!result) {
+      throw new Error('Shopify request did not return a response.');
+    }
 
     if (!result.ok) {
       console.error('[shopify] Order creation failed:', JSON.stringify(result.data));
       const errors = result.data?.errors;
       const errorMsg = typeof errors === 'string' ? errors : JSON.stringify(errors);
+      const authHint = isShopifyAuthError(result)
+        ? ' Verifica que el token sea Admin API (shpat_) con scope write_orders.'
+        : '';
       
       // Save failed order to DB for tracking
       await supabase.from('cod_orders').insert({
@@ -339,7 +420,7 @@ Deno.serve(async (req) => {
       });
 
       return json(
-        { success: false, error: `Error al crear el pedido en Shopify: ${errorMsg}` },
+        { success: false, error: `Error al crear el pedido en Shopify: ${errorMsg}${authHint}` },
         502,
       );
     }
@@ -348,7 +429,7 @@ Deno.serve(async (req) => {
     const shopifyOrderId = shopifyOrder.id;
     const shopifyOrderName = shopifyOrder.name || `#${shopifyOrderId}`;
 
-    console.log(`[shopify] Order created: ${shopifyOrderName} (${shopifyOrderId})`);
+    console.log(`[shopify] Order created: ${shopifyOrderName} (${shopifyOrderId}) via ${tokenSourceUsed || 'unknown token source'}`);
 
     // ── Save to DB ──
     await supabase.from('cod_orders').insert({
