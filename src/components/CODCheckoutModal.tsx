@@ -7,8 +7,9 @@ import { useCartStore } from '@/stores/cartStore';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import {
-  Loader2, MapPin, Phone, User, Mail, AlertTriangle, Building,
+  Loader2, MapPin, Phone, User, Mail, AlertTriangle, Building, CheckSquare,
 } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 import { z } from 'zod';
 
 // ── Blocked‑region postal prefixes ──
@@ -100,6 +101,7 @@ export function CODCheckoutModal({ open, onOpenChange }: CODCheckoutModalProps) 
   const navigate = useNavigate();
   const { items, clearCart } = useCartStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof OrderForm, string>>>({});
   const [form, setForm] = useState<OrderForm>({
     customerName: '',
@@ -340,12 +342,24 @@ export function CODCheckoutModal({ open, onOpenChange }: CODCheckoutModalProps) 
             </p>
           </div>
 
+          {/* Terms checkbox */}
+          <label className="flex items-start gap-2.5 cursor-pointer select-none rounded-lg border p-3 transition-colors hover:bg-muted/40">
+            <Checkbox
+              checked={acceptedTerms}
+              onCheckedChange={(v) => setAcceptedTerms(v === true)}
+              className="mt-0.5 shrink-0"
+            />
+            <span className="text-xs leading-relaxed text-foreground">
+              Confirmo que <strong>estaré disponible en la dirección indicada</strong> para recibir y pagar el pedido al repartidor. Entiendo que si no estoy presente, el paquete será devuelto y podré ser responsable de los gastos de envío.
+            </span>
+          </label>
+
           {/* Submit */}
           <Button
             type="submit"
             size="lg"
             className="w-full min-h-[52px] text-sm font-bold uppercase tracking-wide gap-2 bg-accent text-accent-foreground hover:bg-accent/90 active:scale-[0.97] sm:text-base"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !acceptedTerms}
           >
             {isSubmitting ? (
               <Loader2 className="h-5 w-5 animate-spin" />
