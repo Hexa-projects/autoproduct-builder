@@ -138,6 +138,7 @@ export function CODCheckoutModal({ open, onOpenChange }: CODCheckoutModalProps) 
   const [errors, setErrors] = useState<Partial<Record<keyof OrderForm, string>>>({});
   const [step, setStep] = useState(0); // 0: personal, 1: address, 2: confirm
   const [formStartTracked, setFormStartTracked] = useState(false);
+  const formOpenedAt = useRef<number>(Date.now());
 
   const defaultForm: OrderForm = {
     customerName: '',
@@ -162,6 +163,7 @@ export function CODCheckoutModal({ open, onOpenChange }: CODCheckoutModalProps) 
         numItems: items.reduce((s, i) => s + i.quantity, 0),
       });
       setFormStartTracked(true);
+      formOpenedAt.current = Date.now();
     }
     if (!open) {
       setFormStartTracked(false);
@@ -287,6 +289,8 @@ export function CODCheckoutModal({ open, onOpenChange }: CODCheckoutModalProps) 
           shippingCost,
           total,
           externalOrderId: externalIdRef.current,
+          _hp: '', // honeypot - must be empty
+          _ts: formOpenedAt.current, // timestamp for bot detection
         },
       });
 
