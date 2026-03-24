@@ -138,6 +138,7 @@ export function CODCheckoutModal({ open, onOpenChange }: CODCheckoutModalProps) 
   const [errors, setErrors] = useState<Partial<Record<keyof OrderForm, string>>>({});
   const [step, setStep] = useState(0); // 0: personal, 1: address, 2: confirm
   const [formStartTracked, setFormStartTracked] = useState(false);
+  const formOpenedAt = useRef<number>(Date.now());
 
   const defaultForm: OrderForm = {
     customerName: '',
@@ -162,6 +163,7 @@ export function CODCheckoutModal({ open, onOpenChange }: CODCheckoutModalProps) 
         numItems: items.reduce((s, i) => s + i.quantity, 0),
       });
       setFormStartTracked(true);
+      formOpenedAt.current = Date.now();
     }
     if (!open) {
       setFormStartTracked(false);
@@ -287,6 +289,8 @@ export function CODCheckoutModal({ open, onOpenChange }: CODCheckoutModalProps) 
           shippingCost,
           total,
           externalOrderId: externalIdRef.current,
+          _hp: '', // honeypot - must be empty
+          _ts: formOpenedAt.current, // timestamp for bot detection
         },
       });
 
@@ -391,6 +395,17 @@ export function CODCheckoutModal({ open, onOpenChange }: CODCheckoutModalProps) 
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="px-5 pb-5">
+          {/* Honeypot - invisible to real users, bots will fill it */}
+          <div aria-hidden="true" style={{ position: 'absolute', left: '-9999px', top: '-9999px', opacity: 0, height: 0, overflow: 'hidden' }}>
+            <input
+              type="text"
+              name="website_url"
+              tabIndex={-1}
+              autoComplete="off"
+              onChange={() => {}}
+            />
+          </div>
+
           {/* Step 0: Personal data */}
           {step === 0 && (
             <div className="space-y-3 animate-in fade-in slide-in-from-right-2 duration-200">
