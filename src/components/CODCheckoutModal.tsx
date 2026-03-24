@@ -395,6 +395,17 @@ export function CODCheckoutModal({ open, onOpenChange }: CODCheckoutModalProps) 
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="px-5 pb-5">
+          {/* Honeypot - invisible to real users, bots will fill it */}
+          <div aria-hidden="true" style={{ position: 'absolute', left: '-9999px', top: '-9999px', opacity: 0, height: 0, overflow: 'hidden' }}>
+            <input
+              type="text"
+              name="website_url"
+              tabIndex={-1}
+              autoComplete="off"
+              onChange={() => {}}
+            />
+          </div>
+
           {/* Step 0: Personal data */}
           {step === 0 && (
             <div className="space-y-3 animate-in fade-in slide-in-from-right-2 duration-200">
